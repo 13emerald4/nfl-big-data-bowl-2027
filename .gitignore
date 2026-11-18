@@ -1,45 +1,16 @@
-# Byte-compiled / optimized / DLL files
+# Competition raw data (download via kaggle CLI)
+data/*.csv
+data/*.parquet
+
+# LaTeX temporary build artifacts
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+
+# Python cache
 __pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual Environments
-.venv
-venv/
-ENV/
-
-# IDE & OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
-
-# --- CRITICAL FOR NFL BIG DATA BOWL 2027 (CC BY-NC 4.0 Compliance) ---
-# Never commit competition data files or raw archives
-data/
-*.csv
-*.zip
-*.parquet
-*.feather
+*.pyc
