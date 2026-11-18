@@ -1,0 +1,71 @@
+group,predictor,N,auc_alone,auc_gain,spearman_snaps
+DB,Draft pick (log),118,0.9000,,-0.7343
+DB,NGS final score,118,0.8055,-0.0063,0.5376
+DB,NGS college production score,118,0.7585,-0.0034,0.4531
+DB,Broad jump,95,0.7135,-0.0150,0.2813
+DB,Vertical jump,102,0.6944,-0.0127,0.2241
+DB,Bench reps,43,0.6663,0.0487,-0.2314
+DB,Undrafted,118,0.6380,,-0.4667
+DB,Tracking: DB break speed,118,0.6326,-0.0063,0.2087
+DB,NGS athleticism score,118,0.5880,0.0040,0.1789
+DB,Weight,118,0.5696,0.0016,0.0914
+DB,10-yard split,101,0.5683,-0.0087,-0.2320
+DB,Hand size,118,0.5642,-0.0027,0.0003
+DB,Arm length,118,0.5124,-0.0051,-0.0667
+DB,Wingspan,118,0.4935,-0.0067,-0.0741
+DB,Height,118,0.4861,-0.0053,-0.1221
+DB,40-yard dash,101,0.4578,0.0274,-0.1676
+DL,Draft pick (log),118,0.8221,,-0.7024
+DL,NGS final score,118,0.7610,-0.0016,0.6061
+DL,NGS college production score,118,0.7416,-0.0077,0.4404
+DL,Tracking: gamma-OE (pass-rush drill),118,0.6503,-0.0041,0.1548
+DL,NGS athleticism score,118,0.6316,-0.0179,0.4033
+DL,Undrafted,118,0.6254,,-0.4794
+DL,Tracking: gamma-OE (all drills),118,0.6131,0.0018,0.1653
+DL,Hand size,118,0.5899,-0.0128,0.0355
+DL,40-yard dash,94,0.5847,-0.0122,-0.0800
+DL,Bench reps,54,0.5696,-0.0365,0.0701
+DL,Vertical jump,102,0.5622,-0.0194,0.1910
+DL,Height,118,0.5457,-0.0069,0.1348
+DL,10-yard split,94,0.5367,-0.0089,-0.1061
+DL,Short shuttle,46,0.4951,-0.0620,-0.2186
+DL,Broad jump,97,0.4919,-0.0177,0.1009
+DL,Wingspan,118,0.4579,-0.0105,0.1539
+DL,Weight,118,0.4563,-0.0048,0.0230
+DL,3-cone,43,0.4553,0.0290,0.0403
+DL,Arm length,118,0.4066,-0.0140,0.1588
+OL,Draft pick (log),121,0.9303,,-0.8546
+OL,NGS final score,121,0.8598,0.0004,0.6660
+OL,NGS college production score,121,0.8526,0.0089,0.6095
+OL,Bench reps,53,0.7067,0.0050,0.2387
+OL,Undrafted,121,0.7020,,-0.6495
+OL,Tracking: OL gamma-OE,121,0.6715,0.0061,0.2144
+OL,Weight,121,0.6637,0.0006,0.3011
+OL,NGS athleticism score,121,0.6490,-0.0060,0.3061
+OL,40-yard dash,95,0.6289,-0.0086,-0.2443
+OL,Short shuttle,64,0.6148,-0.0007,-0.2643
+OL,Broad jump,98,0.5628,-0.0043,0.1557
+OL,10-yard split,96,0.5585,-0.0061,-0.1341
+OL,Vertical jump,100,0.5564,-0.0024,0.1415
+OL,Hand size,121,0.5483,-0.0058,0.1668
+OL,Arm length,121,0.5364,-0.0033,0.0553
+OL,3-cone,61,0.5305,-0.0117,-0.1754
+OL,Wingspan,121,0.5128,-0.0036,0.0880
+OL,Height,121,0.4296,0.0008,0.0341
+WR,Draft pick (log),106,0.8745,,-0.7140
+WR,NGS final score,106,0.7843,-0.0096,0.5693
+WR,NGS college production score,106,0.7418,-0.0085,0.4821
+WR,Vertical jump,95,0.7050,-0.0099,0.4578
+WR,Undrafted,106,0.6971,,-0.5875
+WR,Tracking: cut speed (pooled),106,0.6892,-0.0036,0.2104
+WR,Tracking: cut speed (drill-standardised),106,0.6636,-0.0053,0.1591
+WR,Broad jump,94,0.6462,-0.0060,0.3190
+WR,NGS athleticism score,106,0.6337,-0.0112,0.3083
+WR,40-yard dash,96,0.6148,-0.0080,-0.2144
+WR,Tracking: peak speed,106,0.6015,-0.0057,0.1650
+WR,Arm length,106,0.5584,-0.0025,-0.0727
+WR,Height,106,0.4774,-0.0093,-0.0731
+WR,10-yard split,96,0.4668,-0.0105,-0.1704
+WR,Hand size,106,0.4485,-0.0091,-0.0866
+WR,Weight,106,0.4237,-0.0045,-0.0353
+WR,Wingspan,106,0.4159,-0.0057,-0.1255

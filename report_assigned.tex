@@ -109,6 +109,9 @@ We account for multiple testing. Across all 22 controlled tests (six metrics; vo
 We test per-snap efficiency, which depends less on draft investment than snap counts do. Receivers need at least 100 regular-season routes ($N = 57$ with a 40 time) and linemen at least 100 pass rushes ($N = 69$). With draft controls, the drill-standardised score $z_{\text{cut}}$ raises yards per route run by $0.32$ per unit ($p = 0.058$); pooled $s_{\text{cut}}$ shows no effect ($p = 0.56$). Pass-rush-drill $\gamma_{\text{OE}}$ raises starter odds by a factor of $1.60$ ($p = 0.059$) but shows no link to pressure rate ($p = 0.55$) or get-off time ($p = 0.32$). Separation at the throw is not higher for faster cutters: the raw slope on $s_{\text{cut}}$ is $-0.08$ yd per km/h ($p = 0.013$), and $p = 0.16$ with controls. Thus two leads remain near the 5\% line, and the cutting-separation mechanism is not supported.
 
 \noindent\textbf{(b)}
+We rank every available predictor: draft slot, Combine results, NGS scores and the tracking metrics. For starter status we use cross-validated AUC (five folds, twenty repeats). Draft pick ranks first at every position (AUC 0.87 WR, 0.82 DL, 0.90 DB, 0.93 OL), followed by the NGS final and college-production scores. No predictor raises AUC by more than 0.01 over draft pick, apart from two small-sample DB cases. For efficiency we use rank correlations after removing draft pick (and edge versus interior for linemen). For receiver yards per route run the strongest is $z_{\text{cut}}$ ($+0.33$, $p = 0.008$). For pass-rush pressure rate the strongest are the NGS final score ($+0.36$, $p = 0.003$), the 10-yard split ($-0.29$, $p = 0.034$) and the 40 time ($-0.28$, $p = 0.038$). Seven of these 30 correlations fall below $p = 0.05$ where 1.5 are expected, but none survives Holm's correction. Thus Combine information appears in per-snap efficiency, not in playing time, and for pass rushers it includes the stopwatch.
+
+\noindent\textbf{(c)}
 We examine one comeback-route rep each for Puka Nacua (pick 177, 201 lb) and Quentin Johnston (pick 21, 208 lb). Both reach a stem peak near 27 km/h (27.6 and 27.1) and slow to about 12 km/h (12.2 and 12.4). Each sheds about 385--390 kg$\cdot$m/s of momentum, with peak braking of $-5.77$ and $-5.23$ yd/s$^2$. One second after his slowest frame Nacua is back at 22.7 km/h, while Johnston is at 15.7 km/h and slowing. Nacua's path breaks back toward the line; Johnston's turns closer to $90^\circ$. Thus re-acceleration out of the break is a candidate feature, but one rep per player is an illustration, not evidence.
 
 \noindent\textbf{5.}
@@ -125,12 +128,13 @@ We summarise the guidance for front offices.
 Test metrics conditional on draft slot & Draft variables explain 51\% of receiver snap variance; tracking adds 0.2 points \\
 Standardise within each drill & Pooled medians mix drills; Smith-Njigba's pooled median is 24.0 km/h, his cutting median 19.6 \\
 Judge on per-snap efficiency & Snaps and starts follow draft investment \\
-Pre-register the two leads for 2026 & $z_{\text{cut}} \to$ YPRR ($p = 0.058$); pass-rush $\gamma_{\text{OE}} \to$ starter ($p = 0.059$) \\
+Keep the stopwatch for pass rushers & 10-yard split relates to pressure rate at a given pick and position ($p = 0.034$) \\
+Pre-register the leads for 2026 & $z_{\text{cut}} \to$ YPRR; 10-yard split $\to$ pressure rate; pass-rush $\gamma_{\text{OE}} \to$ starter \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \noindent\textbf{(b)}
-We state the limitations. Careers span one to three seasons, efficiency samples are small, each drill has one tracked rep per player, and $a$ cannot separate acceleration from braking. Thus Combine tracking has not yet been shown to add information beyond the draft board. A pre-registered test on the 2026 class is the next step, with the two leads defined in advance.
+We state the limitations. Careers span one to three seasons, efficiency samples are small, each drill has one tracked rep per player, and $a$ cannot separate acceleration from braking. Thus Combine tracking has not yet been shown to add information beyond the draft board. A pre-registered test on the 2026 class is the next step, with the leads defined in advance.
 
 \end{document}

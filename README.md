@@ -30,6 +30,10 @@ Combine tracking metrics correlate with NFL playing time, but almost entirely be
   
   They are candidates for a pre-registered test on the 2026 class, not draft rules.
 * Separation at the throw does **not** rise with cut speed.
+* **Predictor ranking** (`scripts/rank_predictors.py`):
+  * **Playing time:** draft pick ranks first at every position (starter AUC 0.82–0.93), then the NGS final and college-production scores. Nothing adds to draft pick out of sample.
+  * **Per-snap efficiency:** the strongest signals beyond draft slot are drill-standardised cut speed for receiver YPRR (+0.33, p = 0.008), and the NGS final score (+0.36) and 10-yard split (−0.29, p = 0.034) for pass-rush pressure rate.
+  * Exploratory: none of the 30 efficiency correlations survives Holm correction.
 
 ---
 
@@ -37,7 +41,7 @@ Combine tracking metrics correlate with NFL playing time, but almost entirely be
 
 | Artifact | Description |
 | :--- | :--- |
-| [`REPORT.md`](./REPORT.md) / [`REPORT.html`](./REPORT.html) / [`REPORT.pdf`](./REPORT.pdf) | Competition write-up (< 2,000 words, 4 figures, 4 tables) |
+| [`REPORT.md`](./REPORT.md) / [`REPORT.html`](./REPORT.html) / [`REPORT.pdf`](./REPORT.pdf) | Competition write-up (< 2,000 words, 4 figures, 5 tables) |
 | [`report_assigned.pdf`](./report_assigned.pdf) | 4-page formal report (LaTeX) |
 | [`presentation.pdf`](./presentation.pdf) | 10-slide Beamer deck |
 | [`draft_controls.png`](./draft_controls.png) | Test statistic for every model, before vs after draft controls |
@@ -80,6 +84,7 @@ nfl-big-data-bowl-2027/
 │   ├── common.py                          # Paths, loaders, shared definitions
 │   ├── extract_features.py                # Combine features + in-game efficiency
 │   ├── run_regressions.py                 # Every model, test and summary number
+│   ├── rank_predictors.py                 # Predictor ranking (playing time, efficiency)
 │   ├── game_speed_distribution.py         # Regular-season speed distribution
 │   ├── make_field_plot.py                 # Static figures
 │   └── make_interactive_playback.py       # Plotly widgets
@@ -98,6 +103,7 @@ unzip ../data/nfl-big-data-bowl-2027.zip -d ../data/
 
 python scripts/extract_features.py
 python scripts/run_regressions.py
+python scripts/rank_predictors.py
 python scripts/game_speed_distribution.py      # or set NFL_BDB_ZIP to read tracking from the zip
 python scripts/make_field_plot.py
 python scripts/make_interactive_playback.py

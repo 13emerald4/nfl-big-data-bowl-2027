@@ -201,30 +201,45 @@
 \end{frame}
 
 % 9
-\begin{frame}{Guidance for Front Offices}
-  \begin{block}{\textbf{1. Test conditional on draft slot}}
-    A raw link to snaps or starts mostly restates the draft board.
-  \end{block}
-  \begin{block}{\textbf{2. Standardise within each drill}}
-    Prospects run different drill sets; pooled medians mix them.
-  \end{block}
-  \begin{block}{\textbf{3. Judge on per-snap efficiency}}
-    YPRR, pressure rate and separation, not snap volume.
-  \end{block}
-  \begin{block}{\textbf{4. Pre-register the two leads on the 2026 class}}
-    $z_{\text{cut}} \to$ YPRR and pass-rush $\gamma_{\text{OE}} \to$ starter, definitions fixed in advance.
-  \end{block}
+\begin{frame}{Which Factors Predict Performance?}
+  \footnotesize
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{lllll}
+    \toprule
+    \textbf{Outcome} & \textbf{1st} & \textbf{2nd} & \textbf{3rd} & \textbf{Best tracking} \\
+    \midrule
+    WR starter (AUC) & Draft pick 0.87 & NGS final 0.78 & NGS college prod.\ 0.74 & Cut speed 0.69 \\
+    DL starter (AUC) & Draft pick 0.82 & NGS final 0.76 & NGS college prod.\ 0.74 & Pass-rush $\gamma_{\text{OE}}$ 0.65 \\
+    DB starter (AUC) & Draft pick 0.90 & NGS final 0.81 & NGS college prod.\ 0.76 & Break speed 0.63 \\
+    OL starter (AUC) & Draft pick 0.93 & NGS final 0.86 & NGS college prod.\ 0.85 & $\gamma_{\text{OE}}$ 0.67 \\
+    \midrule
+    WR YPRR, beyond pick & \textbf{$z_{\text{cut}}$ +0.33} ($p{=}0.008$) & NGS college +0.21 & NGS athl.\ $-0.19$ & (1st) \\
+    DL pressure, beyond pick + pos. & NGS final +0.36 ($p{=}0.003$) & \textbf{10-yd split $-0.29$} ($p{=}0.034$) & Bench +0.29 ($N{=}34$) & $\gamma_{\text{OE}}$ +0.24 \\
+    \bottomrule
+  \end{tabular}}
+  \vspace{0.6em}
+  \small
+  \begin{itemize}
+    \item \textbf{Playing time:} draft pick first everywhere; no predictor adds more than 0.01 AUC on top of it.
+    \item \textbf{Efficiency:} Combine information shows up here. For pass rushers, \textbf{faster 10-yard split and 40 time go with more pressure} at the same pick and position.
+    \item Exploratory: 7 of 30 efficiency correlations below $p = 0.05$ (1.5 expected); none survives Holm.
+  \end{itemize}
 \end{frame}
 
 % 10
-\begin{frame}{Limitations and Reproducibility}
-  \begin{itemize}
-    \item Careers span 1--3 seasons; efficiency samples are small (57 receivers, 69 rushers).
-    \item One tracked rep per player per drill; $a$ cannot separate acceleration from braking.
-    \item Game context: 66\% of regular-season frames are below 10 km/h; 7.0\% of player-snaps reach 26 km/h.
-    \item Every number is printed by \texttt{scripts/run\_regressions.py} and \texttt{scripts/game\_speed\_distribution.py}; full results in \texttt{results/model\_results.csv}.
-  \end{itemize}
-  \vspace{0.4cm}
+\begin{frame}{Guidance for Front Offices}
+  \small
+  \begin{enumerate}
+    \item \textbf{Test conditional on draft slot.} A raw link to snaps or starts mostly restates the draft board.
+    \item \textbf{Standardise within each drill.} Prospects run different drill sets; pooled medians mix them.
+    \item \textbf{Judge on per-snap efficiency}, not snap volume.
+    \item \textbf{Keep the stopwatch for pass rushers.} Short-area speed relates to pressure rate beyond draft slot.
+    \item \textbf{Pre-register the leads on the 2026 class:} $z_{\text{cut}} \to$ YPRR; 10-yard split $\to$ pressure rate; pass-rush $\gamma_{\text{OE}} \to$ starter.
+  \end{enumerate}
+  \footnotesize
+  \textbf{Limitations:} 1--3 seasons of careers; small efficiency samples (57 receivers, 69 rushers); one tracked rep per drill; $a$ cannot separate acceleration from braking.
+  Every number is printed by the scripts in \texttt{scripts/}; results in \texttt{results/}.
+  \vspace{0.3em}
   \begin{center}
     \textbf{Thank you. Questions and discussion.}
   \end{center}
