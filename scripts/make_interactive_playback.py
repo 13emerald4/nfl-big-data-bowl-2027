@@ -12,8 +12,10 @@ from plotly.subplots import make_subplots
 import scipy.stats as stats
 import numpy as np
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, "..", "data", "nfl-big-data-bowl-2027")
+import common as cm
+
+BASE_DIR = cm.REPO_DIR
+DATA_DIR = cm.DATA_DIR
 
 def make_all_interactive():
     print("Loading data for interactive widgets...")
@@ -42,7 +44,8 @@ def make_all_interactive():
 
     x_grid = np.linspace(0, 40, 300)
     for nfl_id, (label, color) in players_to_plot.items():
-        s = comb.filter((pl.col("nfl_id") == nfl_id) & (pl.col("entity_type") == "PLAYER"))["s"].to_numpy()
+        s = comb.filter((pl.col("nfl_id") == nfl_id) & (pl.col("entity_type") == "PLAYER")
+                        & pl.col("drill_name").is_in(list(cm.WR_CUT_DRILLS)))["s"].to_numpy()
         s_kmh = s * 3.29184
         kde = stats.gaussian_kde(s_kmh)
         pdf_vals = kde(x_grid)
@@ -57,16 +60,10 @@ def make_all_interactive():
             row=1, col=2
         )
 
-    fig1.add_vrect(
-        x0=10, x1=26, fillcolor="rgba(255, 255, 0, 0.12)", line_width=0,
-        annotation_text="Core Working Band (10-26 km/h)", annotation_position="top left",
-        row=1, col=1
-    )
-    fig1.add_vline(x=26, line_width=2, line_dash="dash", line_color="rgba(255, 80, 80, 0.7)", row=1, col=2)
 
     fig1.update_layout(
         title=dict(
-            text="<b>NFL Combine Speed Distribution Analysis: Core Working Band vs. Top-End Sprinting</b>",
+            text="<b>Cutting-drill speed distribution (curl, comeback, speed out, slant)</b><br><sup>Smith-Njigba ran only the slant and speed out; the others ran all four</sup>",
             font=dict(size=17, color="white")
         ),
         paper_bgcolor="#0b0f19",
@@ -89,15 +86,21 @@ def make_all_interactive():
     print("Generating tier_comparison_pdf_cdf.html...")
     wr_players = players.filter(pl.col("nfl_position") == "WR").join(success, on="nfl_id")
     wr_cohort = wr_players.with_columns([
-        pl.when((pl.col("career_games_started") >= 20) | (pl.col("pro_bowl_original_ballot") > 0) | (pl.col("ap_all_pro_1st_team") > 0))
-          .then(pl.lit("Top Performers (Starters / All-Pro, N=16)"))
-          .when(pl.col("career_games_started") >= 3)
-          .then(pl.lit("Average / Rotational Players (N=38)"))
-          .otherwise(pl.lit("Poor / Fringe Prospects (<=2 Starts, N=52)"))
-          .alias("performance_tier")
+        pl.when(pl.col("career_games_started") >= 20).then(pl.lit("top"))
+          .when(pl.col("career_games_started") >= 3).then(pl.lit("middle"))
+          .otherwise(pl.lit("fringe"))
+          .alias("tier_key")
     ])
-    cutting_drills = ["CURL_ROUTE_RIGHT", "COMEBACK_ROUTE_RIGHT", "SPEED_OUT_ROUTE_LEFT", "SLANT_ROUTE_LEFT"]
-    wr_cuts = comb.filter((pl.col("drill_name").is_in(cutting_drills)) & (pl.col("entity_type") == "PLAYER"))
+    feats = pl.read_parquet(os.path.join(cm.OUT_DIR, "features_wr.parquet"))
+    wr_cohort = wr_cohort.join(feats.select(["nfl_id", "s_cut", "draft_overall_pick"]), on="nfl_id")
+    summary = {k: wr_cohort.filter(pl.col("tier_key") == k) for k in ("top", "middle", "fringe")}
+    label = {
+        "top": f"Top (20+ starts, N={summary['top'].height})",
+        "middle": f"Middle (3-19 starts, N={summary['middle'].height})",
+        "fringe": f"Fringe (0-2 starts, N={summary['fringe'].height})",
+    }
+    wr_cohort = wr_cohort.with_columns(pl.col("tier_key").replace_strict(label).alias("performance_tier"))
+    wr_cuts = comb.filter((pl.col("drill_name").is_in(list(cm.WR_CUT_DRILLS))) & (pl.col("entity_type") == "PLAYER"))
     wr_cuts = wr_cuts.join(wr_cohort, on="nfl_id")
 
     fig2 = make_subplots(
@@ -109,9 +112,9 @@ def make_all_interactive():
     )
 
     tiers = [
-        ("Top Performers (Starters / All-Pro, N=16)", "#06d6a0", 3.2),
-        ("Average / Rotational Players (N=38)", "#ffd166", 2.5),
-        ("Poor / Fringe Prospects (<=2 Starts, N=52)", "#ef476f", 2.5)
+        (label["top"], "#06d6a0", 3.2),
+        (label["middle"], "#ffd166", 2.5),
+        (label["fringe"], "#ef476f", 2.5)
     ]
     x_grid = np.linspace(0, 35, 250)
 
@@ -130,8 +133,15 @@ def make_all_interactive():
             row=1, col=2
         )
 
+    top_s, fringe_s = summary["top"]["s_cut"].to_numpy(), summary["fringe"]["s_cut"].to_numpy()
+    t_stat, p_val = stats.ttest_ind(top_s, fringe_s, equal_var=False)
+    top_pick = summary["top"]["draft_overall_pick"].fill_null(262).mean()
+    fringe_pick = summary["fringe"]["draft_overall_pick"].fill_null(262).mean()
     fig2.add_annotation(
-        text="<b>Top Tier Peak shifted RIGHT (+1.54 km/h)</b><br>Statistically significant (t=3.72, <i>p=0.0004</i>)<br>Carries velocity through the break",
+        text=(f"<b>Raw gap: top tier {top_s.mean() - fringe_s.mean():+.2f} km/h faster in cuts</b><br>"
+              f"Welch t={t_stat:.2f}, p={p_val:.5f}<br>"
+              f"But top tier was drafted far earlier (avg pick {top_pick:.0f} vs {fringe_pick:.0f}, UDFA=262);<br>"
+              f"the gap no longer predicts starts once draft pick is controlled"),
         xref="x1", yref="y1",
         x=18, y=0.075,
         showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=2, arrowcolor="#06d6a0",
@@ -143,7 +153,7 @@ def make_all_interactive():
 
     fig2.update_layout(
         title=dict(
-            text="<b>NFL Wide Receiver Cohort Analysis: In-Cut Velocity Preservation</b><br><sup>Comparing 106 NFL Prospects grouped by Career Success</sup>",
+            text=f"<b>Wide receiver cutting-drill speed by career tier</b><br><sup>{wr_cohort.height} prospects, all frames from curl, comeback, speed out and slant drills</sup>",
             font=dict(size=16, color="white")
         ),
         paper_bgcolor="#0b0f19",
@@ -228,7 +238,7 @@ def make_all_interactive():
     )]
 
     fig3.update_layout(
-        title="<b>Combine Comeback Route: 10 Hz RFID Tracking Comparison</b><br><sup>Puka Nacua (Pick 177, All-Pro) vs. Quentin Johnston (Pick 21, 1st Rd)</sup>",
+        title="<b>Combine Comeback Route: 10 Hz Optical Tracking Comparison</b><br><sup>Puka Nacua (Pick 177, All-Pro) vs. Quentin Johnston (Pick 21, 1st Rd)</sup>",
         title_font=dict(size=16, color="white"),
         shapes=shapes,
         xaxis=dict(range=[20, 45], title="Field Length (Yards)", showgrid=False, zeroline=False, color="white"),

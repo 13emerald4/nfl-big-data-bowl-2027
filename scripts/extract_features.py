@@ -1,103 +1,120 @@
 """
 extract_features.py
-Extracts 10 Hz kinematic derivatives and Newtonian features across WR, DB, DL, and OL cohorts.
+Builds one feature table per position group from 10 Hz Combine tracking and
+joins regular-season outcomes (volume and per-snap efficiency).
+
+Writes data/features_{wr,dl,db,ol}.parquet (git-ignored).
+
+Feature definitions
+  WR  s_cut      median speed (km/h) over all frames of the four cutting drills
+                 (curl, comeback, speed out, slant), as in the original report.
+      s_cut_z    drill-standardised cut speed: the player's median speed in each
+                 cutting drill, z-scored against every WR who ran that drill,
+                 averaged over the drills he ran. Removes drill-mix bias (players
+                 did not all run the same drills).
+  DL  gamma_all  90th-percentile |a| (km/h/s) over every Combine drill (original).
+      gamma_pr   90th-percentile |a| within each PASS_RUSH_DRILL rep, averaged
+                 over reps. Every DL prospect ran this drill.
+      *_oe       residual of the above on Combine weight ("Gamma over expected").
+  DB  db_p90     90th-percentile speed in the 45-degree back-pedal transition drill.
+  OL  ol_oe      90th-percentile |a| in mirror/wave drills, residualised on weight.
+Note: the `a` column is a magnitude (never negative), so 90th-percentile |a|
+counts hard braking as well as acceleration.
 """
 import os
-import polars as pl
-import statsmodels.api as sm
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, "..", "data", "nfl-big-data-bowl-2027")
-OUT_DIR = os.path.join(BASE_DIR, "data")
+import numpy as np
+import pandas as pd
+import polars as pl
+import statsmodels.formula.api as smf
+
+import common as cm
+
+
+def wr_features(ct, base, pp):
+    ids = base.loc[base.nfl_position.isin(cm.WR_POS), "nfl_id"].tolist()
+    cuts = (ct.filter(pl.col("nfl_id").is_in(ids) & pl.col("drill_name").is_in(list(cm.WR_CUT_DRILLS)))
+              .with_columns(pl.col("drill_name").replace_strict(cm.WR_CUT_DRILLS).alias("drill"),
+                            (pl.col("s") * cm.YDS_TO_KMH).alias("kmh")))
+    pooled = cuts.group_by("nfl_id").agg(pl.col("kmh").median().alias("s_cut"),
+                                         pl.col("kmh").max().alias("s_cut_max")).to_pandas()
+    per = cuts.group_by(["nfl_id", "drill"]).agg(pl.col("kmh").median().alias("med")).to_pandas()
+    per["z"] = per.groupby("drill")["med"].transform(lambda x: (x - x.mean()) / x.std())
+    z = per.groupby("nfl_id").agg(s_cut_z=("z", "mean"), n_cut_drills=("drill", "nunique")).reset_index()
+    peak = (ct.filter(pl.col("nfl_id").is_in(ids)).group_by("nfl_id")
+              .agg((pl.col("s").max() * cm.YDS_TO_KMH).alias("peak_any_drill")).to_pandas())
+
+    routes = pp[pp.nfl_id.isin(ids) & pp.route_ran.notna()]
+    eff = routes.groupby("nfl_id").agg(
+        routes=("route_ran", "size"), targets=("target", "sum"),
+        rec_yards=("rec_yards", lambda x: x.fillna(0).sum()),
+        separation=("separation_at_pass_forward", "mean"),
+        n_separation=("separation_at_pass_forward", "count")).reset_index()
+    eff["yprr"] = eff.rec_yards / eff.routes
+    eff["targets_per_route"] = eff.targets / eff.routes
+
+    df = (base[base.nfl_position.isin(cm.WR_POS)].merge(pooled, on="nfl_id").merge(z, on="nfl_id")
+          .merge(peak, on="nfl_id").merge(eff, on="nfl_id", how="left"))
+    for c in ["routes", "targets", "rec_yards"]:
+        df[c] = df[c].fillna(0)
+    return df
+
+
+def residualise(df, col, out):
+    ok = df[col].notna() & df["combine_weight"].notna()
+    m = smf.ols(f"{col} ~ combine_weight", df[ok]).fit()
+    df.loc[ok, out] = m.resid
+    return m
+
+
+def dl_features(ct, base, pp):
+    ids = base.loc[base.nfl_position.isin(cm.DL_POS), "nfl_id"].tolist()
+    dl = ct.filter(pl.col("nfl_id").is_in(ids))
+    g_all = dl.group_by("nfl_id").agg((pl.col("a") * cm.YDS_TO_KMH).quantile(0.9).alias("gamma_all"),
+                                      pl.col("drill_name").n_unique().alias("n_drills")).to_pandas()
+    g_pr = (dl.filter(pl.col("drill_name") == cm.DL_DRILL)
+              .group_by(["nfl_id", "event_id"]).agg((pl.col("a") * cm.YDS_TO_KMH).quantile(0.9).alias("g"))
+              .group_by("nfl_id").agg(pl.col("g").mean().alias("gamma_pr"), pl.len().alias("pr_reps")).to_pandas())
+    df = (base[base.nfl_position.isin(cm.DL_POS)].merge(g_all, on="nfl_id").merge(g_pr, on="nfl_id", how="left")
+          .dropna(subset=["combine_weight"]))
+    residualise(df, "gamma_all", "gamma_all_oe")
+    residualise(df, "gamma_pr", "gamma_pr_oe")
+
+    rush = pp[pp.nfl_id.isin(ids) & pp.player_get_off.notna()]
+    eff = rush.groupby("nfl_id").agg(rush_snaps=("player_get_off", "size"), get_off=("player_get_off", "mean"),
+                                     pressures=("time_to_pressure", "count")).reset_index()
+    eff["pressure_rate"] = eff.pressures / eff.rush_snaps
+    return df.merge(eff, on="nfl_id", how="left")
+
+
+def db_features(ct, base):
+    ids = base.loc[base.nfl_position.isin(cm.DB_POS), "nfl_id"].tolist()
+    f = (ct.filter(pl.col("nfl_id").is_in(ids) & (pl.col("drill_name") == cm.DB_DRILL))
+           .group_by("nfl_id").agg((pl.col("s") * cm.YDS_TO_KMH).quantile(0.9).alias("db_p90")).to_pandas())
+    return base[base.nfl_position.isin(cm.DB_POS)].merge(f, on="nfl_id")
+
+
+def ol_features(ct, base):
+    ids = base.loc[base.nfl_position.isin(cm.OL_POS), "nfl_id"].tolist()
+    f = (ct.filter(pl.col("nfl_id").is_in(ids) & pl.col("drill_name").is_in(cm.OL_DRILLS))
+           .group_by("nfl_id").agg((pl.col("a") * cm.YDS_TO_KMH).quantile(0.9).alias("ol_a")).to_pandas())
+    df = base[base.nfl_position.isin(cm.OL_POS)].merge(f, on="nfl_id").dropna(subset=["combine_weight"])
+    residualise(df, "ol_a", "ol_oe")
+    return df
+
 
 def extract_all():
-    os.makedirs(OUT_DIR, exist_ok=True)
-    print("Loading raw Combine tracking and metadata...")
-    comb_trk = pl.read_csv(os.path.join(DATA_DIR, "combine_tracking.csv"))
-    players = pl.read_csv(os.path.join(DATA_DIR, "players.csv"), null_values=["NA"])
-    comb_res = pl.read_csv(os.path.join(DATA_DIR, "combine_results.csv"), null_values=["NA"])
-    success = pl.read_csv(os.path.join(DATA_DIR, "player_career_successes.csv"))
+    os.makedirs(cm.OUT_DIR, exist_ok=True)
+    print(f"Reading competition data from {os.path.abspath(cm.DATA_DIR)}")
+    ct = cm.combine_tracking()
+    base = cm.player_base()
+    pp = cm.player_play_regular_season()
+    out = {"wr": wr_features(ct, base, pp), "dl": dl_features(ct, base, pp),
+           "db": db_features(ct, base), "ol": ol_features(ct, base)}
+    for k, df in out.items():
+        df.to_parquet(os.path.join(cm.OUT_DIR, f"features_{k}.parquet"), index=False)
+        print(f"{k.upper()} cohort: {len(df)} prospects")
 
-    # 1. Wide Receivers (In-Cut Velocity Preservation)
-    print("Extracting WR cutting kinematics...")
-    wr_ids = players.filter(pl.col("nfl_position") == "WR")["nfl_id"].to_list()
-    cutting_drills = ["CURL_ROUTE_RIGHT", "COMEBACK_ROUTE_RIGHT", "SPEED_OUT_ROUTE_LEFT", "SLANT_ROUTE_LEFT"]
-    wr_cuts = comb_trk.filter((pl.col("nfl_id").is_in(wr_ids)) & 
-                              (pl.col("drill_name").is_in(cutting_drills)) & 
-                              (pl.col("entity_type") == "PLAYER"))
-    wr_cuts = wr_cuts.with_columns([
-        ((pl.col("s") - pl.col("s").shift(1)) / 0.1).alias("delta_s_dt")
-    ])
-    wr_feat = wr_cuts.group_by("nfl_id").agg([
-        (pl.col("s") * 3.29184).quantile(0.50).alias("wr_median_cut_speed"),
-        (pl.col("s") * 3.29184).quantile(0.90).alias("wr_p90_cut_speed"),
-        pl.col("delta_s_dt").quantile(0.05).alias("wr_p05_braking_decel"),
-        (pl.col("s") * 3.29184).max().alias("wr_max_drill_speed")
-    ])
-    df_wr = wr_feat.join(comb_res, on="nfl_id").join(success, on="nfl_id").join(players, on="nfl_id")
-    print(f"WR cohort: {len(df_wr)} prospects")
-
-    # 2. Defensive Backs (Transition Break Speed)
-    print("Extracting DB transition break kinematics...")
-    db_ids = players.filter(pl.col("nfl_position").is_in(["CB", "SS", "FS", "DB"]))["nfl_id"].to_list()
-    db_drills = comb_trk.filter((pl.col("nfl_id").is_in(db_ids)) & 
-                                (pl.col("drill_name") == "BACK_PEDAL_AND_TRANSITION_45_DEGREE_REACTION") &
-                                (pl.col("entity_type") == "PLAYER"))
-    db_feat = db_drills.group_by("nfl_id").agg([
-        (pl.col("s") * 3.29184).quantile(0.50).alias("db_median_speed"),
-        (pl.col("s") * 3.29184).quantile(0.90).alias("db_p90_speed"),
-        (pl.col("a") * 3.29184).quantile(0.90).alias("db_p90_accel"),
-        (pl.col("s") * 3.29184).max().alias("db_max_speed")
-    ])
-    df_db = db_feat.join(comb_res, on="nfl_id").join(success, on="nfl_id").join(players, on="nfl_id")
-    print(f"DB cohort: {len(df_db)} prospects")
-
-    # 3. Defensive Line / EDGE (Mass-Residualized Acceleration Gamma_OE)
-    print("Extracting DL/EDGE trench acceleration...")
-    dl_ids = players.filter(pl.col("nfl_position").is_in(["DE", "DT", "NT", "OLB"]))["nfl_id"].to_list()
-    dl_drills = comb_trk.filter((pl.col("nfl_id").is_in(dl_ids)) & (pl.col("entity_type") == "PLAYER"))
-    dl_feat = dl_drills.group_by("nfl_id").agg([
-        (pl.col("a") * 3.29184).quantile(0.90).alias("dl_gamma_accel"),
-        (pl.col("s") * 3.29184).max().alias("dl_max_speed")
-    ])
-    df_dl = dl_feat.join(comb_res, on="nfl_id").join(success, on="nfl_id").join(players, on="nfl_id")
-    df_dl_clean = df_dl.filter(pl.col("combine_weight").is_not_null() & pl.col("dl_gamma_accel").is_not_null()).to_pandas()
-    mass_mod = sm.OLS(df_dl_clean["dl_gamma_accel"], sm.add_constant(df_dl_clean["combine_weight"])).fit()
-    df_dl_clean["dl_gamma_oe"] = mass_mod.resid
-    df_dl = pl.from_pandas(df_dl_clean)
-    print(f"DL cohort: {len(df_dl)} prospects")
-
-    # 4. Offensive Line (Lateral Mirror Gamma_OE)
-    print("Extracting OL lateral mirror kinematics...")
-    ol_ids = players.filter(pl.col("nfl_position").is_in(["T", "G", "C"]))["nfl_id"].to_list()
-    ol_drills = comb_trk.filter((pl.col("nfl_id").is_in(ol_ids)) & 
-                                (pl.col("drill_name").is_in(["PASS_PRO_MIRROR_DRILL", "PASS_PRO-MIRROR_DRILL", "FIVE_YARD_WAVE_DRILL_SLIDE_AND_SHUFFLE"])) &
-                                (pl.col("entity_type") == "PLAYER"))
-    ol_feat = ol_drills.group_by("nfl_id").agg([
-        (pl.col("s") * 3.29184).quantile(0.50).alias("ol_median_speed"),
-        (pl.col("s") * 3.29184).quantile(0.90).alias("ol_p90_speed"),
-        (pl.col("a") * 3.29184).quantile(0.90).alias("ol_p90_accel"),
-        (pl.col("s") * 3.29184).max().alias("ol_max_speed")
-    ])
-    df_ol = ol_feat.join(comb_res, on="nfl_id").join(success, on="nfl_id").join(players, on="nfl_id")
-    df_ol_clean = df_ol.filter(pl.col("combine_weight").is_not_null() & pl.col("ol_p90_accel").is_not_null()).to_pandas()
-    mass_mod_ol = sm.OLS(df_ol_clean["ol_p90_accel"], sm.add_constant(df_ol_clean["combine_weight"])).fit()
-    df_ol_clean["ol_gamma_oe"] = mass_mod_ol.resid
-    df_ol = pl.from_pandas(df_ol_clean)
-    print(f"OL cohort: {len(df_ol)} prospects")
-
-    # Save to disk
-    df_wr.write_parquet(os.path.join(OUT_DIR, "features_wr.parquet"))
-    df_db.write_parquet(os.path.join(OUT_DIR, "features_db.parquet"))
-    df_dl.write_parquet(os.path.join(OUT_DIR, "features_dl.parquet"))
-    df_ol.write_parquet(os.path.join(OUT_DIR, "features_ol.parquet"))
-
-    df_wr.write_csv(os.path.join(OUT_DIR, "features_wr.csv"))
-    df_db.write_csv(os.path.join(OUT_DIR, "features_db.csv"))
-    df_dl.write_csv(os.path.join(OUT_DIR, "features_dl.csv"))
-    df_ol.write_csv(os.path.join(OUT_DIR, "features_ol.csv"))
-
-    print("All features extracted and persisted successfully!")
 
 if __name__ == "__main__":
     extract_all()

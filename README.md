@@ -1,4 +1,4 @@
-# Beyond the Stopwatch: Evaluating NFL Prospects via Continuous Speed Densities, Newtonian Mechanics, and Gamma-Over-Expected
+# Beyond the Stopwatch, Behind the Draft Board: What Combine Tracking Adds Once Draft Position Is Known
 
 [![NFL Big Data Bowl 2027](https://img.shields.io/badge/NFL%20Big%20Data%20Bowl-2027-013369.svg)](https://www.kaggle.com/competitions/nfl-big-data-bowl-2027)
 [![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
@@ -6,115 +6,109 @@
 
 > **Submission for the NFL Big Data Bowl 2027 (Kaggle Analytics Track)**  
 > **Author:** Michael Polley  
-> **Theme:** Linking 10 Hz Combine Sensor Tracking to Regular-Season NFL Game Performance
+> **Theme:** Linking 10 Hz Combine sensor tracking to regular-season NFL performance
 
 ---
 
-## 🏈 Executive Summary
+## Summary
 
-Every draft season, NFL front offices spend millions in draft capital on **"Workout Warriors"**—athletes who run blazing 4.38-second 40-yard dashes in shorts, only to struggle creating a single yard of separation on Sundays.
+Combine tracking metrics correlate with NFL playing time, but almost entirely because teams already draft on them. Every model is fit twice: on the Combine metric alone, and again with draft pick, an undrafted flag and draft-class (and position) fixed effects.
 
-A stopwatch records only one scalar number: total elapsed time ($T = \int \frac{dx}{v}$). It cannot observe how momentum is absorbed, whether hips decouple, or how rapidly speed decays in a cut.
+| Metric → outcome | Metric alone | + draft controls |
+|:--|:-:|:-:|
+| WR cut speed → career snaps (per km/h) | +114, p = 0.002 | −10, p = 0.74 |
+| WR cut speed → starter (odds ratio) | 1.63, p = 0.026 | 1.11, p = 0.76 |
+| DL mass-adjusted acceleration (γ_OE) → starter (odds ratio) | 1.85, p = 0.042 | 1.52, p = 0.35 |
+| DB break speed → career snaps | +192, p = 0.011 | −15, p = 0.80 |
+| OL γ_OE → career snaps | +155, p = 0.015 | +58, p = 0.32 |
 
-This project bridges **high-frequency (10 Hz) Combine tracking data** with **regular-season NFL game performance** through a synthesis of **continuous speed distributions (PDF/CDF)**, **classical Newtonian mechanics ($F = ma$)**, and **frequentist econometrics (OLS, Logit, Welch's t-tests)**.
-
-### Key Discoveries:
-1. **The 40-Yard Dash Fails ($p = 0.343$):** In multivariable regression across 106 Combine WRs, official 40-yard dash times explain **zero statistically significant variance** in regular-season career snaps.
-2. **In-Cut Velocity Preservation ($s_{\text{cut}}$) Dominates ($p = 0.002$):** Every $+1.0\text{ km/h}$ maintained through the apex of a route cut yields **$+132$ additional career regular-season snaps** and increases the odds of becoming an established NFL starter by **$+77\%$** ($p = 0.010, \text{OR} = 1.77$).
-3. **Defensive Back Break Velocity ($p = 0.016$):** In 45-degree transition drills, 90th percentile break speed directly predicts defensive snaps ($\beta = +191.84, p = 0.016$), while 40-yard dash remains insignificant ($p = 0.471$).
-4. **The Core Working Band (10–26 km/h):** Over 95% of in-game NFL movement occurs below $26\text{ km/h}$. All-Pros like Puka Nacua spend **63.5%** of drill time operating in this band, whereas raw track athletes skew toward an unutilized $>30\text{ km/h}$ tail.
-5. **Gamma-Over-Expected ($\gamma_{\text{OE}}$) in Trench Play ($p = 0.042$):** For pass rushers and offensive linemen, acceleration residualized against body mass ($\gamma_{\text{OE}}$) increases DL starter odds by **$+85\%$** ($\text{OR} = 1.85$) and significantly predicts offensive snaps for linemen ($\beta = +154.98, p = 0.026$).
-
----
-
-## 📊 Visualizations & Artifacts
-
-| Artifact | Type | Description |
-| :--- | :--- | :--- |
-| **[`report_assigned.pdf`](./report_assigned.pdf)** | Formal Paper | 4-page research report formatted to formal LaTeX assignment style guidelines. |
-| **[`REPORT.md`](./REPORT.md) / [`REPORT.html`](./REPORT.html)** | Submission | Competition research submission report (< 2,000 words, MathJax, embedded figures). |
-| **[`presentation.tex`](./presentation.tex) / [`presentation.pdf`](./presentation.pdf)** | Beamer Deck | 10-slide presentation deck formatted for NFL front offices and competition judges. |
-| **[`wr_speed_pdf_cdf.png`](./wr_speed_pdf_cdf.png)** | Static PNG | Speed Probability Density Function (PDF) and Cumulative Distribution Function (CDF) comparing All-Pros vs. 1st-Round sprinters. |
-| **[`route_kinematics_field_plot.png`](./route_kinematics_field_plot.png)** | Static PNG | High-resolution publication diagram of Puka Nacua vs. Quentin Johnston executing the Combine Comeback drill on a regulation NFL turf slice. |
-| **[`mass_vs_gamma_scatter.png`](./mass_vs_gamma_scatter.png)** | Static PNG | Mass vs. acceleration scatter plot establishing Newtonian Gamma-Over-Expected ($\gamma_{\text{OE}}$). |
-| **[`tier_comparison_pdf_cdf.html`](./tier_comparison_pdf_cdf.html)** | Interactive HTML | Interactive cohort density analysis: Top Performers ($N=16$) vs. Average ($N=38$) vs. Fringe ($N=52$). |
-| **[`route_playback_interactive.html`](./route_playback_interactive.html)** | Interactive HTML | 10 Hz frame-by-frame field playback with interactive scrubbing slider and live speed tags. |
+* Draft variables explain **51%** of receiver snap variance. Cut speed and the 40 time add **0.2 points**.
+* Of 22 controlled tests, one has p < 0.05, about what chance predicts. **None survives Holm correction.**
+* Two per-snap efficiency leads remain near p = 0.06:
+  * drill-standardised cut speed → yards per route run (+0.32 per unit, p = 0.058);
+  * pass-rush-drill γ_OE → starter (odds ratio 1.60, p = 0.059).
+  
+  They are candidates for a pre-registered test on the 2026 class, not draft rules.
+* Separation at the throw does **not** rise with cut speed.
 
 ---
 
-## 🔬 Mathematical & Physical Methodology
+## Artifacts
 
-### 1. Derivatives of Motion (Delta, Gamma, Jerk)
-$$\mathbf{r}(t) = (x, y), \quad \mathbf{v}(t) = \frac{d\mathbf{r}}{dt} \ (\text{Delta}), \quad \mathbf{a}(t) = \frac{d\mathbf{v}}{dt} \ (\text{Gamma}), \quad \mathbf{j}(t) = \frac{d\mathbf{a}}{dt} \ (\text{Jerk})$$
-
-### 2. Newtonian Ground Reaction Force & Inertia
-$$\mathbf{F}_{\text{net}} = m \cdot \mathbf{a}, \quad \mathbf{p} = m \cdot \mathbf{v}, \quad P = \mathbf{F} \cdot \mathbf{v}$$
-Because heavier athletes face greater inertia ($m$), we isolate specific explosive capacity by estimating **Gamma-Over-Expected ($\gamma_{\text{OE}}$)**:
-$$\gamma_{\text{OE}} = \gamma_{\text{observed}} - \mathbb{E}[\gamma \mid \text{Mass}]$$
-
-### 3. Frequentist Statistical Specifications
-* **Career Playing Time Model (OLS):**
-  $$\text{Snaps}_i = \beta_0 + \beta_1 (s_{\text{cut}, i}) + \beta_2 (\text{Forty}_i) + \epsilon_i$$
-  *Result:* $\beta_1 = +132.09$ ($t = 3.125, p = 0.002$), $\beta_2 = -642.09$ ($t = -0.954, p = 0.343$).
-* **Starter Probability Model (Logit):**
-  $$\ln\left(\frac{P_i}{1 - P_i}\right) = \alpha + \beta_1 (s_{\text{cut}, i}) + \beta_2 (\text{Forty}_i)$$
-  *Result:* $\beta_1 = +0.569$ ($z = 2.575, p = 0.010, \text{Odds Ratio} = 1.77$).
+| Artifact | Description |
+| :--- | :--- |
+| [`REPORT.md`](./REPORT.md) / [`REPORT.html`](./REPORT.html) / [`REPORT.pdf`](./REPORT.pdf) | Competition write-up (< 2,000 words, 4 figures, 4 tables) |
+| [`report_assigned.pdf`](./report_assigned.pdf) | 4-page formal report (LaTeX) |
+| [`presentation.pdf`](./presentation.pdf) | 10-slide Beamer deck |
+| [`draft_controls.png`](./draft_controls.png) | Test statistic for every model, before vs after draft controls |
+| [`wr_speed_pdf_cdf.png`](./wr_speed_pdf_cdf.png) | Cutting-drill speed density and CDF for four case-study receivers |
+| [`route_kinematics_field_plot.png`](./route_kinematics_field_plot.png) | Comeback route: Nacua vs Johnston paths and speed through the break |
+| [`mass_vs_gamma_scatter.png`](./mass_vs_gamma_scatter.png) | Defensive-line weight vs 90th-percentile acceleration |
+| [`tier_comparison_pdf_cdf.html`](./tier_comparison_pdf_cdf.html) | Interactive: cutting-drill speed by receiver career tier |
+| [`speed_pdf_cdf_interactive.html`](./speed_pdf_cdf_interactive.html) | Interactive: cutting-drill speed for the four case-study receivers |
+| [`route_playback_interactive.html`](./route_playback_interactive.html) | Interactive: 10 Hz comeback-route playback |
+| [`results/`](./results) | Model table (`model_results.csv`), descriptives and game-speed summary printed by the scripts |
 
 ---
 
-## 🛠️ Repository Structure
+## Methodology
+
+* **Metrics.**
+  * WR median speed in the four cutting drills ($s_{\text{cut}}$).
+  * WR drill-standardised cut speed ($z_{\text{cut}}$): per-drill median, z-scored within the drill, then averaged. This matters because prospects ran different drill sets.
+  * DL and OL Gamma-Over-Expected: 90th-percentile acceleration magnitude residualised on weight. For DL this is computed both over all drills and within the pass-rush drill.
+  * DB 90th-percentile speed in the 45° transition drill.
+* **Outcomes.**
+  * Career snaps.
+  * Starter status (10+ starts).
+  * Regular-season per-snap efficiency from `player_play.csv` (preseason and playoff snaps excluded): yards per route run, targets per route, separation at the throw, pressure rate, get-off time.
+* **Models.** OLS with HC1 robust standard errors, or logit for starter status. Each is fit raw and with $\log(\text{pick})$, a UDFA flag, draft-class fixed effects and (DL/DB/OL) position fixed effects. Holm correction is applied across the 22 controlled tests.
+* **Note on `a`.** The tracking column `a` is a magnitude, so acceleration percentiles include braking.
+
+---
+
+## Repository Structure
 
 ```text
-nfl-bdb-2027/
-├── README.md                           # Project thesis and empirical findings
-├── presentation.tex                    # LaTeX Beamer 10-slide presentation deck
-├── route_kinematics_field_plot.png     # Static figure: Regulation NFL field kinematics
-├── wr_speed_pdf_cdf.png                # Static figure: Speed PDF & CDF comparisons
-├── tier_comparison_pdf_cdf.html        # Interactive: Full cohort performance tiers
-├── speed_pdf_cdf_interactive.html      # Interactive: Speed density exploration
-├── route_playback_interactive.html     # Interactive: 10 Hz animated tracking playback
+nfl-big-data-bowl-2027/
+├── REPORT.md / REPORT.html / REPORT.pdf   # Competition write-up
+├── report_assigned.tex / .pdf             # Formal 4-page report
+├── presentation.tex / .pdf                # Beamer deck
+├── results/                               # Outputs of the analysis scripts
+├── figures/                               # Copies of the static figures
 ├── scripts/
-│   ├── extract_features.py             # Feature extraction from 10 Hz tracking
-│   ├── run_regressions.py              # Frequentist OLS & Logit models
-│   ├── make_field_plot.py              # Matplotlib regulation field generator
-│   └── make_interactive_playback.py    # Plotly animation builder
-└── requirements.txt                    # Python environment specifications
+│   ├── common.py                          # Paths, loaders, shared definitions
+│   ├── extract_features.py                # Combine features + in-game efficiency
+│   ├── run_regressions.py                 # Every model, test and summary number
+│   ├── game_speed_distribution.py         # Regular-season speed distribution
+│   ├── make_field_plot.py                 # Static figures
+│   └── make_interactive_playback.py       # Plotly widgets
+└── requirements.txt
 ```
 
 ---
 
-## 🚀 Getting Started
+## Reproducing
 
-### 1. Prerequisites
-* Python 3.11+
-* [Kaggle CLI](https://github.com/Kaggle/kaggle-cli) (authenticated)
-
-### 2. Installation
 ```bash
-git clone https://github.com/your-username/nfl-bdb-2027.git
-cd nfl-bdb-2027
 pip install -r requirements.txt
-```
+kaggle competitions download -c nfl-big-data-bowl-2027 -p ../data/
+unzip ../data/nfl-big-data-bowl-2027.zip -d ../data/
+# CSVs are read from ../data/nfl-big-data-bowl-2027 (override with NFL_BDB_DATA)
 
-### 3. Data Download
-```bash
-kaggle competitions download -c nfl-big-data-bowl-2027 -p data/
-unzip data/nfl-big-data-bowl-2027.zip -d data/
-```
-
-### 4. Run Analysis & View Interactive Visuals
-```bash
+python scripts/extract_features.py
 python scripts/run_regressions.py
-# Open any interactive visual in your browser:
-start route_playback_interactive.html
+python scripts/game_speed_distribution.py      # or set NFL_BDB_ZIP to read tracking from the zip
+python scripts/make_field_plot.py
+python scripts/make_interactive_playback.py
 ```
 
 ---
 
-## 📋 Citation
+## Citation
 ```bibtex
-@article{polley2027beyondstopwatch,
-  title={Beyond the Stopwatch: Evaluating NFL Prospects via Continuous Speed Densities, Newtonian Mechanics, and Gamma-Over-Expected},
+@article{polley2027behinddraftboard,
+  title={Beyond the Stopwatch, Behind the Draft Board: What Combine Tracking Adds Once Draft Position Is Known},
   author={Polley, Michael},
   journal={NFL Big Data Bowl 2027},
   year={2026}

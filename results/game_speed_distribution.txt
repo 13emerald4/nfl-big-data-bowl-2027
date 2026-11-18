@@ -1,0 +1,8 @@
+Regular-season frames: 18,108,111
+Median speed: 2.06 yd/s (6.8 km/h)
+95th percentile: 6.66 yd/s (21.9 km/h)
+Share of frames below 10 km/h: 0.663
+Share of frames in 10-26 km/h: 0.322
+Share of frames above 26 km/h: 0.0151
+Player-snaps with tracking: 251,107
+Share of player-snaps whose top speed exceeds 26 km/h: 0.070

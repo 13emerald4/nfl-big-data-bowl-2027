@@ -1,0 +1,45 @@
+group,metric,outcome,spec,model,N,coef,se,p,odds_ratio,r2,p_holm
+WR,WR cut speed (pooled),Career snaps,raw,ols,96,114.21,37.3978,0.00225861,,0.0810224,
+WR,WR cut speed (pooled),Career snaps,controlled,ols,96,-10.0097,30.0299,0.738888,,0.513119,1
+WR,WR cut speed (pooled),Starter (>=10 starts),raw,logit,96,0.48708,0.21887,0.0260525,1.62756,0.0929203,
+WR,WR cut speed (pooled),Starter (>=10 starts),controlled,logit,96,0.105514,0.347305,0.761273,1.11128,0.503994,1
+WR,WR cut speed (pooled),Yards per route run (>=100 routes),raw,ols,57,0.0309076,0.0796388,0.697944,,0.0220489,
+WR,WR cut speed (pooled),Yards per route run (>=100 routes),controlled,ols,57,-0.0483822,0.0824855,0.557504,,0.206528,1
+WR,WR cut speed (pooled),Targets per route (>=100 routes),raw,ols,57,0.00631431,0.00671908,0.347342,,0.0436207,
+WR,WR cut speed (pooled),Targets per route (>=100 routes),controlled,ols,57,-0.000779193,0.00726127,0.914545,,0.205546,1
+WR,WR cut speed (pooled),Separation at throw (>=20 targets),raw,ols,70,-0.0781827,0.031517,0.0131142,,0.0915465,
+WR,WR cut speed (pooled),Separation at throw (>=20 targets),controlled,ols,70,-0.0701388,0.0500441,0.161052,,0.131443,1
+WR,WR cut speed (drill-standardised),Career snaps,raw,ols,96,215.786,94.661,0.0226333,,0.0529027,
+WR,WR cut speed (drill-standardised),Career snaps,controlled,ols,96,-19.1874,105.295,0.855406,,0.51292,1
+WR,WR cut speed (drill-standardised),Starter (>=10 starts),raw,logit,96,0.805459,0.435804,0.0645713,2.23772,0.0726062,
+WR,WR cut speed (drill-standardised),Starter (>=10 starts),controlled,logit,96,0.620145,0.89156,0.486697,1.8592,0.507527,1
+WR,WR cut speed (drill-standardised),Yards per route run (>=100 routes),raw,ols,57,0.239297,0.148659,0.107464,,0.0819211,
+WR,WR cut speed (drill-standardised),Yards per route run (>=100 routes),controlled,ols,57,0.315765,0.166396,0.0577389,,0.258749,1
+WR,WR cut speed (drill-standardised),Targets per route (>=100 routes),raw,ols,57,0.0166773,0.0131483,0.204655,,0.0592322,
+WR,WR cut speed (drill-standardised),Targets per route (>=100 routes),controlled,ols,57,0.0118632,0.0176433,0.501334,,0.21587,1
+WR,WR cut speed (drill-standardised),Separation at throw (>=20 targets),raw,ols,70,-0.109708,0.0800622,0.170598,,0.062099,
+WR,WR cut speed (drill-standardised),Separation at throw (>=20 targets),controlled,ols,70,-0.0635162,0.147496,0.666737,,0.107025,1
+DL,DL gamma-OE (all drills),Starter (>=10 starts),raw,logit,118,0.614678,0.302095,0.041879,1.84906,0.0405746,
+DL,DL gamma-OE (all drills),Starter (>=10 starts),controlled,logit,118,0.420337,0.448268,0.348403,1.52247,0.437157,1
+DL,DL gamma-OE (all drills),Career snaps,raw,ols,118,153.306,58.5564,0.00884217,,0.0620098,
+DL,DL gamma-OE (all drills),Career snaps,controlled,ols,118,85.0251,42.984,0.0479217,,0.577786,1
+DL,DL gamma-OE (all drills),Pressure rate (>=100 rushes),raw,ols,69,0.00671515,0.00336593,0.0460391,,0.202208,
+DL,DL gamma-OE (all drills),Pressure rate (>=100 rushes),controlled,ols,69,0.00537134,0.00377796,0.155097,,0.370419,1
+DL,DL gamma-OE (all drills),"Get-off time, s (>=100 rushes)",raw,ols,69,-0.00130964,0.00725044,0.856659,,0.513618,
+DL,DL gamma-OE (all drills),"Get-off time, s (>=100 rushes)",controlled,ols,69,0.00442381,0.0073669,0.548174,,0.595256,1
+DL,DL gamma-OE (pass-rush drill),Starter (>=10 starts),raw,logit,118,0.352922,0.219465,0.107813,1.42322,0.0260634,
+DL,DL gamma-OE (pass-rush drill),Starter (>=10 starts),controlled,logit,118,0.472504,0.249918,0.0586736,1.60401,0.461731,1
+DL,DL gamma-OE (pass-rush drill),Career snaps,raw,ols,118,56.4744,67.5482,0.403121,,0.0231657,
+DL,DL gamma-OE (pass-rush drill),Career snaps,controlled,ols,118,41.9026,39.5535,0.289422,,0.572172,1
+DL,DL gamma-OE (pass-rush drill),Pressure rate (>=100 rushes),raw,ols,69,1.28072e-05,0.00207459,0.995074,,0.140041,
+DL,DL gamma-OE (pass-rush drill),Pressure rate (>=100 rushes),controlled,ols,69,0.000905914,0.00150601,0.547487,,0.345514,1
+DL,DL gamma-OE (pass-rush drill),"Get-off time, s (>=100 rushes)",raw,ols,69,-0.00331298,0.00652917,0.611866,,0.515493,
+DL,DL gamma-OE (pass-rush drill),"Get-off time, s (>=100 rushes)",controlled,ols,69,-0.00537293,0.00540516,0.320205,,0.598966,1
+DB,DB break speed (p90),Career snaps,raw,ols,101,191.842,75.5847,0.0111452,,0.0659541,
+DB,DB break speed (p90),Career snaps,controlled,ols,101,-15.0494,58.7255,0.797744,,0.532391,1
+DB,DB break speed (p90),Starter (>=10 starts),raw,logit,101,0.381148,0.268691,0.156034,1.46396,0.0194383,
+DB,DB break speed (p90),Starter (>=10 starts),controlled,logit,101,-0.430417,0.484762,0.374598,0.650238,0.544074,1
+OL,OL gamma-OE (mirror/wave),Career snaps,raw,ols,95,154.977,63.4087,0.0145215,,0.0697695,
+OL,OL gamma-OE (mirror/wave),Career snaps,controlled,ols,95,58.3264,58.2193,0.316421,,0.555852,1
+OL,OL gamma-OE (mirror/wave),Starter (>=10 starts),raw,logit,95,0.327253,0.181568,0.0714872,1.38715,0.0587736,
+OL,OL gamma-OE (mirror/wave),Starter (>=10 starts),controlled,logit,95,0.37851,0.303166,0.211839,1.46011,0.546763,1

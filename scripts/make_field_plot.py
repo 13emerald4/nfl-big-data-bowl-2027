@@ -1,197 +1,158 @@
 """
 make_field_plot.py
-Generates the publication static figures:
-1. route_kinematics_field_plot.png
-2. wr_speed_pdf_cdf.png
-3. mass_vs_gamma_scatter.png
+Static publication figures (written to the repo root and copied to figures/):
+  1. draft_controls.png              test statistic per model, before vs after draft controls
+  2. wr_speed_pdf_cdf.png            cutting-drill speed density, four case-study receivers
+  3. route_kinematics_field_plot.png comeback route: paths and speed through the break
+  4. mass_vs_gamma_scatter.png       mass vs 90th-percentile acceleration (DL)
+Run extract_features.py and run_regressions.py first.
 """
 import os
-import polars as pl
+import shutil
+
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import polars as pl
 import scipy.stats as stats
 import statsmodels.formula.api as smf
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(BASE_DIR, "..", "data", "nfl-big-data-bowl-2027")
+import common as cm
+
+SURFACE, INK, INK2, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#e4e3df"
+BLUE, ORANGE, AQUA, YELLOW = "#2a78d6", "#eb6834", "#1baf7a", "#eda100"
+plt.rcParams.update({
+    "figure.facecolor": SURFACE, "axes.facecolor": SURFACE, "savefig.facecolor": SURFACE,
+    "axes.edgecolor": GRID, "axes.labelcolor": INK2, "xtick.color": INK2, "ytick.color": INK2,
+    "text.color": INK, "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.8,
+    "axes.spines.top": False, "axes.spines.right": False, "font.size": 10, "legend.frameon": False,
+})
+CASE = {56042: ("Puka Nacua (pick 177)", BLUE), 55884: ("Jaxon Smith-Njigba (pick 20)", ORANGE),
+        57144: ("Brian Thomas Jr. (pick 23)", AQUA), 55885: ("Quentin Johnston (pick 21)", YELLOW)}
+
+
+def save(fig, name):
+    out = os.path.join(cm.REPO_DIR, name)
+    fig.savefig(out, dpi=220, bbox_inches="tight")
+    os.makedirs(os.path.join(cm.REPO_DIR, "figures"), exist_ok=True)
+    shutil.copy(out, os.path.join(cm.REPO_DIR, "figures", name))
+    plt.close(fig)
+    print(f"Saved: {out}")
+
+
+def draft_controls():
+    res = pd.read_csv(os.path.join(cm.RESULTS_DIR, "model_results.csv"))
+    res["z"] = res["coef"] / res["se"]
+    res["row"] = res["metric"] + "  |  " + res["outcome"]
+    rows = list(dict.fromkeys(res["row"]))[::-1]
+    y = {r: i for i, r in enumerate(rows)}
+    fig, ax = plt.subplots(figsize=(9.5, 0.36 * len(rows) + 1.4))
+    ax.axvspan(-1.96, 1.96, color="#efeeea", zorder=0, lw=0)
+    ax.axvline(0, color=INK2, lw=0.8)
+    for r in rows:
+        a = res[(res.row == r) & (res.spec == "raw")].z.iloc[0]
+        b = res[(res.row == r) & (res.spec == "controlled")].z.iloc[0]
+        ax.plot([a, b], [y[r], y[r]], color=GRID, lw=2, zorder=1)
+    for spec, color, lab in [("raw", BLUE, "Combine metric alone (+ 40 time or weight)"),
+                             ("controlled", ORANGE, "+ draft pick, UDFA flag, draft class (and position)")]:
+        d = res[res.spec == spec]
+        ax.scatter(d.z, [y[r] for r in d.row], s=48, color=color, edgecolor=SURFACE, linewidth=1.5, zorder=3, label=lab)
+    ax.set_yticks(range(len(rows)))
+    ax.set_yticklabels(rows, fontsize=8.5, color=INK)
+    ax.set_xlabel("Test statistic (coefficient / standard error); shaded band = not significant at 5%")
+    ax.legend(loc="lower left", bbox_to_anchor=(0.0, 1.01), ncol=2, fontsize=9)
+    ax.set_title("Every Combine metric's link to NFL outcomes, before and after draft controls", loc="left",
+                 fontsize=11.5, color=INK, pad=28)
+    ax.grid(axis="y", visible=False)
+    save(fig, "draft_controls.png")
+
+
+def speed_pdf_cdf(ct):
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.2))
+    grid = np.linspace(0, 32, 300)
+    for nid, (label, color) in CASE.items():
+        s = (ct.filter((pl.col("nfl_id") == nid) & pl.col("drill_name").is_in(list(cm.WR_CUT_DRILLS)))["s"].to_numpy()
+             * cm.YDS_TO_KMH)
+        a1.plot(grid, stats.gaussian_kde(s)(grid), color=color, lw=2, label=label)
+        xs = np.sort(s)
+        a2.plot(xs, np.arange(1, len(xs) + 1) / len(xs), color=color, lw=2, label=label)
+    a1.set_title("Speed density, cutting drills only", loc="left", fontsize=10.5)
+    a1.set_xlabel("Speed (km/h)"); a1.set_ylabel("Density")
+    a2.set_title("Cumulative share of frames", loc="left", fontsize=10.5)
+    a2.set_xlabel("Speed (km/h)"); a2.set_ylabel("Share of frames at or below speed")
+    a2.legend(loc="lower right", fontsize=8.5)
+    fig.text(0.01, -0.02, "Cutting drills: curl, comeback, speed out, slant. Smith-Njigba's tracked cutting work is slant and "
+                          "speed out only; the others ran all four.",
+             fontsize=8.5, color=INK2)
+    save(fig, "wr_speed_pdf_cdf.png")
+
+
+def route_plot(ct, wr):
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 4.3), gridspec_kw={"width_ratios": [1.25, 1]})
+    a1.set_facecolor("#e9f1ea")
+    for x in range(20, 46, 5):
+        a1.axvline(x, color="white", lw=1.6 if x % 10 == 0 else 0.8, zorder=0)
+    for nid, color in [(56042, BLUE), (55885, YELLOW)]:
+        name = wr.loc[wr.nfl_id == nid, "display_name"].iloc[0]
+        g = (ct.filter((pl.col("nfl_id") == nid) & (pl.col("drill_name") == "COMEBACK_ROUTE_RIGHT")).sort("time").to_pandas())
+        kmh = g.s.to_numpy() * cm.YDS_TO_KMH
+        brk = int(np.argmax(g.x.to_numpy()))
+        lo = brk - 5 + int(np.argmin(kmh[brk - 5:brk + 6]))
+        a1.plot(g.x, g.y, color=color, lw=2, label=name, zorder=2)
+        a1.scatter(g.x.iloc[lo], g.y.iloc[lo], s=60, color=color, edgecolor="white", linewidth=1.5, zorder=3)
+        t = (np.arange(len(kmh)) - lo) / 10
+        a2.plot(t, kmh, color=color, lw=2, label=name)
+        dsdt = np.diff(g.s.to_numpy()) / 0.1
+        a2.text(1.75, 27 if nid == 56042 else 4,
+                f"{name.split()[-1]}: slowest {kmh[lo]:.1f} km/h\npeak braking {dsdt.min():.2f} yd/s²\n"
+                f"{kmh[min(lo + 10, len(kmh) - 1)]:.1f} km/h one second later",
+                fontsize=8, color=INK, va="top" if nid == 56042 else "bottom",
+                bbox=dict(boxstyle="square,pad=0.3", fc=SURFACE, ec=color, lw=1.2))
+    a1.set_aspect("equal"); a1.grid(False)
+    a1.set_xlabel("Field x (yards)"); a1.set_ylabel("Field y (yards)")
+    a1.set_title("Comeback route paths (dot = slowest frame)", loc="left", fontsize=10.5)
+    a1.legend(loc="upper left", fontsize=8.5)
+    a2.axvline(0, color=INK2, lw=0.8, ls="--")
+    a2.set_xlabel("Seconds from slowest frame of the break"); a2.set_ylabel("Speed (km/h)")
+    a2.set_title("Speed into and out of the break (one rep each)", loc="left", fontsize=10.5)
+    a2.set_xlim(right=4.4)
+    save(fig, "route_kinematics_field_plot.png")
+
+
+def mass_gamma(dl):
+    fig, ax = plt.subplots(figsize=(8.5, 5))
+    m = smf.ols("gamma_all ~ combine_weight", dl).fit()
+    for flag, color, lab in [(0, BLUE, "Fewer than 10 starts"), (1, ORANGE, "10+ starts")]:
+        d = dl[dl.starter == flag]
+        ax.scatter(d.combine_weight, d.gamma_all, s=42, color=color, edgecolor=SURFACE, linewidth=1.2, label=lab, zorder=3)
+    w = np.linspace(dl.combine_weight.min() - 5, dl.combine_weight.max() + 5, 100)
+    ax.plot(w, m.params.Intercept + m.params.combine_weight * w, color=INK2, lw=2, ls="--",
+            label=f"Expected given weight (slope {m.params.combine_weight:.3f}, R² {m.rsquared:.2f})")
+    offsets = {"Laiatu Latu": (-22, 0.55), "Braden Fiske": (14, 0.45), "Gervon Dexter": (14, 0.45)}
+    for _, r in dl[dl.display_name.isin(list(offsets))].iterrows():
+        dx, dy = offsets[r.display_name]
+        ax.annotate(f"{r.display_name} ({r.gamma_all_oe:+.2f} over expected)", (r.combine_weight, r.gamma_all),
+                    xytext=(r.combine_weight + dx, r.gamma_all + dy), fontsize=8.5, color=INK,
+                    arrowprops=dict(arrowstyle="-", color=INK2, lw=0.8))
+    ax.set_xlabel("Combine weight (lb)")
+    ax.set_ylabel("90th-percentile |acceleration|, all drills (km/h/s)")
+    ax.set_title(f"Defensive linemen (N={len(dl)}): heavier players post lower acceleration", loc="left", fontsize=11)
+    ax.legend(fontsize=8.5, loc="lower left")
+    ax.set_ylim(top=dl.gamma_all.max() + 1.0)
+    save(fig, "mass_vs_gamma_scatter.png")
+
 
 def make_all_plots():
-    print("Loading data for static figures...")
-    comb = pl.read_csv(os.path.join(DATA_DIR, "combine_tracking.csv"))
-    players = pl.read_csv(os.path.join(DATA_DIR, "players.csv"), null_values=["NA"])
-    comb_res = pl.read_csv(os.path.join(DATA_DIR, "combine_results.csv"), null_values=["NA"])
-    success = pl.read_csv(os.path.join(DATA_DIR, "player_career_successes.csv"))
+    ct = cm.combine_tracking()
+    wr = pd.read_parquet(os.path.join(cm.OUT_DIR, "features_wr.parquet"))
+    dl = pd.read_parquet(os.path.join(cm.OUT_DIR, "features_dl.parquet"))
+    draft_controls()
+    speed_pdf_cdf(ct)
+    route_plot(ct, wr)
+    mass_gamma(dl)
 
-    # -------------------------------------------------------------
-    # 1. wr_speed_pdf_cdf.png
-    # -------------------------------------------------------------
-    print("Generating wr_speed_pdf_cdf.png...")
-    players_to_plot = {
-        56042: ("Puka Nacua (Pick 177, All-Pro)", "crimson"),
-        55884: ("Jaxon Smith-Njigba (Pick 20, All-Pro)", "navy"),
-        55885: ("Quentin Johnston (Pick 21)", "gray"),
-        57144: ("Brian Thomas Jr. (Pick 23)", "teal")
-    }
-
-    plt.figure(figsize=(12, 5))
-    plt.subplot(1, 2, 1)
-    for nfl_id, (label, color) in players_to_plot.items():
-        s = comb.filter((pl.col("nfl_id") == nfl_id) & (pl.col("entity_type") == "PLAYER"))["s"].to_numpy()
-        s_kmh = s * 3.29184
-        kde = stats.gaussian_kde(s_kmh)
-        x_grid = np.linspace(0, 38, 200)
-        plt.plot(x_grid, kde(x_grid), label=label, color=color, lw=2.2)
-
-    plt.axvspan(10, 26, color="yellow", alpha=0.15, label="NFL Core Working Band (10-26 km/h)")
-    plt.title("Speed Probability Density Function (PDF) in Combine Drills")
-    plt.xlabel("Speed (km/h)")
-    plt.ylabel("Density")
-    plt.legend(fontsize=8)
-    plt.grid(True, alpha=0.3)
-
-    plt.subplot(1, 2, 2)
-    for nfl_id, (label, color) in players_to_plot.items():
-        s = comb.filter((pl.col("nfl_id") == nfl_id) & (pl.col("entity_type") == "PLAYER"))["s"].to_numpy()
-        s_kmh = np.sort(s * 3.29184)
-        y_cdf = np.arange(1, len(s_kmh) + 1) / len(s_kmh)
-        plt.plot(s_kmh, y_cdf, label=label, color=color, lw=2.2)
-
-    plt.axvline(26, color="red", linestyle="--", alpha=0.6, label="Top-Speed Threshold (26 km/h)")
-    plt.title("Speed Cumulative Distribution Function (CDF)")
-    plt.xlabel("Speed (km/h)")
-    plt.ylabel("Cumulative Probability F(s)")
-    plt.legend(fontsize=8)
-    plt.grid(True, alpha=0.3)
-
-    plt.tight_layout()
-    pdf_cdf_path = os.path.join(BASE_DIR, "wr_speed_pdf_cdf.png")
-    plt.savefig(pdf_cdf_path, dpi=200)
-    plt.close()
-    print(f"Saved: {pdf_cdf_path}")
-
-    # -------------------------------------------------------------
-    # 2. route_kinematics_field_plot.png
-    # -------------------------------------------------------------
-    print("Generating route_kinematics_field_plot.png...")
-    def draw_nfl_field_section(ax, xmin=20, xmax=45, ymin=0, ymax=15):
-        ax.set_facecolor("#2d6a4f")
-        for x in range(int(xmin // 5) * 5, int(xmax) + 6, 5):
-            if xmin <= x <= xmax:
-                lw = 1.8 if x % 10 == 0 else 0.9
-                color = "white" if x % 10 == 0 else "#e0e0e0"
-                alpha = 0.85 if x % 10 == 0 else 0.5
-                ax.axvline(x, ymin=0, ymax=1, color=color, lw=lw, alpha=alpha, linestyle="-")
-                if x % 10 == 0:
-                    ax.text(x, ymax - 1.2, f"{x}", color="white", fontsize=11, fontweight="bold", ha="center", va="center", alpha=0.9)
-                    ax.text(x, ymin + 1.2, f"{x}", color="white", fontsize=11, fontweight="bold", ha="center", va="center", alpha=0.9)
-        for x in range(int(xmin), int(xmax) + 1):
-            if x % 5 != 0:
-                ax.plot([x, x], [ymin, ymin + 0.6], color="white", lw=0.8, alpha=0.6)
-                ax.plot([x, x], [ymax - 0.6, ymax], color="white", lw=0.8, alpha=0.6)
-        ax.axhline(0, color="white", lw=3, alpha=0.95)
-        ax.set_xlim(xmin, xmax)
-        ax.set_ylim(ymin, ymax)
-        ax.set_aspect("equal")
-        ax.set_xlabel("Field Length (X Yards)", fontsize=12, fontweight="bold", labelpad=8)
-        ax.set_ylabel("Field Width (Y Yards)", fontsize=12, fontweight="bold", labelpad=8)
-
-    puka = comb.filter((pl.col("nfl_id") == 56042) & (pl.col("drill_name") == "COMEBACK_ROUTE_RIGHT") & (pl.col("entity_type") == "PLAYER")).sort("time")
-    qj = comb.filter((pl.col("nfl_id") == 55885) & (pl.col("drill_name") == "COMEBACK_ROUTE_RIGHT") & (pl.col("entity_type") == "PLAYER")).sort("time")
-
-    fig, axes = plt.subplots(2, 1, figsize=(14, 8), gridspec_kw={"height_ratios": [1, 1]})
-    
-    # Subplot 1: Puka Nacua
-    ax1 = axes[0]
-    draw_nfl_field_section(ax1, xmin=22, xmax=44, ymin=-0.5, ymax=12)
-    s_kmh_puka = puka["s"].to_numpy() * 3.29184
-    sc1 = ax1.scatter(puka["x"], puka["y"], c=s_kmh_puka, cmap="plasma", s=65, zorder=4, edgecolor="black", lw=0.5)
-    ax1.plot(puka["x"], puka["y"], color="white", lw=1.5, alpha=0.7, linestyle="--", zorder=3)
-    ax1.annotate("START (Release)", xy=(puka["x"][0], puka["y"][0]), xytext=(puka["x"][0]-1.5, puka["y"][0]+2.0),
-                 arrowprops=dict(arrowstyle="->", color="white", lw=1.2), color="white", fontweight="bold", fontsize=10)
-    break_idx_puka = int(np.argmax(puka["x"].to_numpy()))
-    ax1.annotate(f"BREAK POINT (18 yd stem)\nPeak Braking: -5.77 yd/s²\nSpeed: {s_kmh_puka[break_idx_puka]:.1f} km/h", 
-                 xy=(float(puka["x"][break_idx_puka]), float(puka["y"][break_idx_puka])), 
-                 xytext=(float(puka["x"][break_idx_puka])-7.5, float(puka["y"][break_idx_puka])-3.5),
-                 arrowprops=dict(arrowstyle="->", color="cyan", lw=1.8), color="cyan", fontweight="bold", fontsize=10, 
-                 bbox=dict(boxstyle="round,pad=0.3", facecolor="#1b263b", edgecolor="cyan", alpha=0.85))
-    ax1.set_title("Puka Nacua (Pick 177, All-Pro) — Combine Comeback Route Kinematics", fontsize=13, fontweight="bold", pad=10)
-
-    # Subplot 2: Quentin Johnston
-    ax2 = axes[1]
-    draw_nfl_field_section(ax2, xmin=22, xmax=44, ymin=-0.5, ymax=12)
-    s_kmh_qj = qj["s"].to_numpy() * 3.29184
-    sc2 = ax2.scatter(qj["x"], qj["y"], c=s_kmh_qj, cmap="plasma", s=65, zorder=4, edgecolor="black", lw=0.5)
-    ax2.plot(qj["x"], qj["y"], color="white", lw=1.5, alpha=0.7, linestyle="--", zorder=3)
-    ax2.annotate("START (Release)", xy=(float(qj["x"][0]), float(qj["y"][0])), xytext=(float(qj["x"][0])-1.5, float(qj["y"][0])+2.0),
-                 arrowprops=dict(arrowstyle="->", color="white", lw=1.2), color="white", fontweight="bold", fontsize=10)
-    break_idx_qj = int(np.argmax(qj["x"].to_numpy()))
-    ax2.annotate(f"BREAK POINT (18 yd stem)\nPeak Braking: -5.23 yd/s²\nSpeed: {s_kmh_qj[break_idx_qj]:.1f} km/h", 
-                 xy=(float(qj["x"][break_idx_qj]), float(qj["y"][break_idx_qj])), 
-                 xytext=(float(qj["x"][break_idx_qj])-7.5, float(qj["y"][break_idx_qj])-3.5),
-                 arrowprops=dict(arrowstyle="->", color="#ffbe0b", lw=1.8), color="#ffbe0b", fontweight="bold", fontsize=10,
-                 bbox=dict(boxstyle="round,pad=0.3", facecolor="#1b263b", edgecolor="#ffbe0b", alpha=0.85))
-    ax2.set_title("Quentin Johnston (Pick 21, 1st Round) — Combine Comeback Route Kinematics", fontsize=13, fontweight="bold", pad=10)
-
-    cbar = fig.colorbar(sc1, ax=axes.ravel().tolist(), orientation="horizontal", fraction=0.046, pad=0.15)
-    cbar.set_label("Instantaneous Movement Speed (km/h)", fontsize=11, fontweight="bold")
-    plt.tight_layout()
-    field_plot_path = os.path.join(BASE_DIR, "route_kinematics_field_plot.png")
-    plt.savefig(field_plot_path, dpi=300)
-    plt.close()
-    print(f"Saved: {field_plot_path}")
-
-    # -------------------------------------------------------------
-    # 3. mass_vs_gamma_scatter.png
-    # -------------------------------------------------------------
-    print("Generating mass_vs_gamma_scatter.png...")
-    dl_ids = players.filter(pl.col("nfl_position").is_in(["DE", "DT", "NT", "OLB"]))["nfl_id"].to_list()
-    dl_drills = comb.filter((pl.col("nfl_id").is_in(dl_ids)) & (pl.col("entity_type") == "PLAYER"))
-    dl_feat = dl_drills.group_by("nfl_id").agg([
-        (pl.col("a") * 3.29184).quantile(0.90).alias("gamma_accel")
-    ])
-    df_p = dl_feat.join(comb_res, on="nfl_id").join(success, on="nfl_id").join(players, on="nfl_id").to_pandas()
-    df_p = df_p.dropna(subset=["combine_weight", "gamma_accel"])
-
-    mod = smf.ols("gamma_accel ~ combine_weight", data=df_p).fit()
-    df_p["gamma_OE"] = mod.resid
-    df_p["is_starter"] = (df_p["career_games_started"] >= 10).astype(int)
-
-    plt.figure(figsize=(10, 6), facecolor="#0b0f19")
-    ax = plt.gca()
-    ax.set_facecolor("#161b26")
-    starters = df_p[df_p["is_starter"] == 1]
-    backups = df_p[df_p["is_starter"] == 0]
-
-    plt.scatter(backups["combine_weight"], backups["gamma_accel"], color="#ef476f", alpha=0.6, s=55, label="Rotational / Fringe (<10 Starts)", edgecolors="none")
-    plt.scatter(starters["combine_weight"], starters["gamma_accel"], color="#06d6a0", alpha=0.9, s=85, label="NFL Starters (>=10 Starts)", edgecolors="white", lw=1.2)
-
-    w_line = np.linspace(df_p["combine_weight"].min() - 5, df_p["combine_weight"].max() + 5, 100)
-    pred_gamma = mod.predict({"combine_weight": w_line})
-    p_val = mod.pvalues.iloc[1]
-    plt.plot(w_line, pred_gamma, color="white", linestyle="--", lw=2, label=f"Expected Gamma E[a|Mass] (p={p_val:.3f})")
-
-    notable = ["Braden Fiske", "Laiatu Latu", "Gervon Dexter", "Dante Stills"]
-    for _, r in df_p[df_p["display_name"].isin(notable)].iterrows():
-        name = r["display_name"]
-        oe = r["gamma_OE"]
-        txt = f"{name}\n(+{oe:.2f} OE)"
-        plt.annotate(txt, xy=(r["combine_weight"], r["gamma_accel"]), xytext=(r["combine_weight"] + 3, r["gamma_accel"] + 0.3),
-                     arrowprops=dict(arrowstyle="->", color="#ffd166", lw=1.2), color="white", fontweight="bold", fontsize=9,
-                     bbox=dict(boxstyle="round,pad=0.2", facecolor="#1b263b", edgecolor="#ffd166", alpha=0.85))
-
-    plt.title("Newtonian Kinesiology: Mass vs. Instantaneous Acceleration (Gamma)", fontsize=14, fontweight="bold", color="white", pad=12)
-    plt.xlabel("Combine Weight (lbs)", fontsize=12, fontweight="bold", color="white")
-    plt.ylabel("90th Percentile Acceleration (Gamma, km/h/s)", fontsize=12, fontweight="bold", color="white")
-    plt.tick_params(colors="white")
-    plt.grid(True, alpha=0.15, color="white")
-    plt.legend(facecolor="#1b263b", edgecolor="white", labelcolor="white", fontsize=10)
-
-    plt.tight_layout()
-    mass_gamma_path = os.path.join(BASE_DIR, "mass_vs_gamma_scatter.png")
-    plt.savefig(mass_gamma_path, dpi=250)
-    plt.close()
-    print(f"Saved: {mass_gamma_path}")
-    print("All static figures generated successfully!")
 
 if __name__ == "__main__":
     make_all_plots()

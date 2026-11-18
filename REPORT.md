@@ -1,193 +1,142 @@
-# Beyond the Stopwatch: Evaluating NFL Prospects via Continuous Speed Densities, Newtonian Mechanics, and Gamma-Over-Expected
+# Beyond the Stopwatch, Behind the Draft Board: What Combine Tracking Adds Once Draft Position Is Known
 
 **Author:** Michael Polley  
 **Track:** NFL Big Data Bowl 2027 (Kaggle Analytics Track)  
-**Submission Format:** Formal Research Report  
-**Word Count:** 1,840 words | **Figures & Tables:** 6 items  
+**Code:** every number below is printed by `scripts/run_regressions.py` and `scripts/game_speed_distribution.py` (outputs in `results/`).
 
 ---
 
-## 1. Introduction: The Epistemic Crisis of the Stopwatch
+## 1. The question a front office actually faces
 
-Every draft cycle, NFL front offices commit premium draft capital to "Workout Warriors"—prospects who post blazing times in shorts at the NFL Scouting Combine, only to struggle creating separation on Sundays.
+Combine sensor tracking records how a prospect moves through every drill at 10 Hz, not just how long a sprint took. The obvious test is whether those movement metrics predict NFL careers. They appear to. Among 96 receivers with a 40 time, each extra km/h of median speed in cutting drills goes with **+114 career snaps** (p = 0.002). Mass-adjusted acceleration in defensive linemen goes with **1.85× the odds of becoming a starter** (p = 0.042).
 
-Consider the physical definition of the 40-yard dash time:
-$$T = \int_{0}^{40} \frac{dx}{v(x)}$$
+Those correlations answer the wrong question. NFL playing time is handed out mostly by draft slot: teams play the players they invested in. A scout does not need to know whether a fast-cutting receiver will play. They need to know whether he will play **more than his draft slot already predicts**. So every model here is fit twice: once on the Combine metric alone, and once adding the prospect's draft pick (log scale), an undrafted flag and draft-class fixed effects for seasons of exposure (plus position fixed effects for linemen and defensive backs).
 
-Mathematically, a stopwatch records the scalar accumulation of an inverted velocity curve. Collapsing dynamic movement into a single scalar ($T$) discards the micro-kinematics that decide football plays:
-* Instantaneous acceleration and rate of force development (RFD) off the line of scrimmage.
-* Velocity preservation and momentum retention through $90^\circ$ and $135^\circ$ directional cuts.
-* The operational speed density where separation actually occurs.
-
-With 10 Hz optical Combine sensor tracking linked to regular-season game tracking across 510 prospects (2023–2025), we evaluate whether high-frequency kinematics and Newtonian mechanics predict NFL performance where stopwatches fail.
-
-Using frequentist econometrics and classical mechanics, we establish three findings:
-1. Official 40-yard dash times explain zero statistically significant variance in career offensive snaps ($p = 0.343$).
-2. In-cut velocity preservation ($s_{\text{cut}}$) is the primary determinant of receiver playing time ($p = 0.002$) and starter probability ($p = 0.010, \text{OR} = 1.77$).
-3. In trench play (DL/OL), raw acceleration is confounded by inertia ($F = ma$). Residualizing acceleration against athlete mass yields Gamma-Over-Expected ($\gamma_{\text{OE}}$), which increases starter odds by $+85\%$ ($p = 0.042$).
+**Finding.** The four tracking metrics behind the usual "movement beats the stopwatch" claims (receiver cut speed, defensive-line and offensive-line mass-adjusted acceleration, defensive-back break speed) each show a significant raw link to playing time. **None of them survives the draft controls.** Draft position alone explains 51% of the variance in receiver snaps, and the tracking metrics add 0.2 percentage points. The two leads left over are per-snap efficiency signals at p of about 0.06. They are worth a pre-registered test on the 2026 class, not a draft rule today.
 
 ---
 
-## 2. Theory: The Kinematic Hierarchy & The Core Working Band
+## 2. Data and definitions
 
-### 2.1 The Kinematic Hierarchy
-An athlete's planar position vector $\mathbf{r}(t) = \big(x(t), y(t)\big)$ decomposes into successive time derivatives:
+The cohort is 510 prospects drafted or signed in 2023–2025. Combine tracking supplies 10 Hz position, speed `s` and acceleration magnitude `a` for each drill rep. Outcomes are career snaps and starts through 2025, plus per-snap efficiency computed from `player_play.csv`. **Regular-season snaps only**: 249,269 of the file's 314,197 rows; the rest are preseason and playoffs.
 
-$$\mathbf{v}(t) = \frac{d\mathbf{r}}{dt} = \big(\dot{x}, \dot{y}\big), \quad s(t) = \|\mathbf{v}(t)\|$$
-$$\mathbf{a}(t) = \frac{d\mathbf{v}}{dt} = \big(\ddot{x}, \ddot{y}\big), \quad \mathbf{j}(t) = \frac{d\mathbf{a}}{dt} = \big(\dddot{x}, \dddot{y}\big)$$
+| Group | Combine metric | N | Efficiency outcome |
+|:--|:--|:-:|:--|
+| WR | Median speed across curl, comeback, speed-out and slant frames ($s_{\text{cut}}$, km/h) | 106 (96 with a 40) | Yards per route run, targets per route, separation at the throw |
+| WR | Drill-standardised cut speed ($z_{\text{cut}}$): median speed per drill, z-scored within the drill, averaged | 106 | same |
+| DL | $\gamma_{\text{OE}}$: 90th-percentile acceleration, residualised on weight; all drills pooled, or the pass-rush drill only | 118 | Pressure rate, get-off time |
+| DB | 90th-percentile speed in the 45° back-pedal transition drill | 101 | — |
+| OL | $\gamma_{\text{OE}}$ in the mirror and wave drills | 95 | — |
 
-Here $s(t)$ is scalar speed, $\mathbf{a}(t)$ is acceleration (Gamma), and $\mathbf{j}(t)$ is jerk.
+Two definitions needed fixing before testing:
 
-### 2.2 The Fallacy of the High-Speed Tail: Defining the Core Working Band
-Traditional scouting fixates on maximum velocity ($s_{\text{max}} > 32\text{ km/h}$). However, empirical in-game distributions reveal a stark contrast:
-* Across 314,197 regular-season snaps, median in-game speed is $2.06\text{ yd/s}$ ($6.78\text{ km/h}$).
-* $95\%$ of all tracking frames occur below $6.81\text{ yd/s}$ ($22.4\text{ km/h}$).
-* Speeds $>26\text{ km/h}$ account for $<2.5\%$ of snaps, confined to uncontested vertical routes.
-
-We formalize the **Core Working Band (CWB)**:
-$$\text{CWB} \equiv s \in [10.0, 26.0]\text{ km/h}$$
-
-Athlete operating occupancy within this band is given by:
-$$\text{Occupancy}_{\text{CWB}} = \int_{10}^{26} f(u)\,du$$
-
-where $f(s)$ is the speed probability density function (PDF).
+* **Drill mix.** Prospects did not run the same drills. Jaxon Smith-Njigba's tracked cutting work is only the slant and the speed out. A pooled median across all his drills, including the gauntlet, gives 24.0 km/h; his cutting-drill median is 19.6 km/h. $z_{\text{cut}}$ compares each player only with others who ran the same drill.
+* **Acceleration is a magnitude.** `a` is never negative, so its 90th percentile counts hard braking as well as burst. Pooled over every drill, $\gamma$ also rises with the number of drills a lineman ran (r = 0.36). The pass-rush drill, which all 118 linemen ran, gives a like-for-like version.
 
 ---
 
-## 3. Empirical Case Study: Speed Density & Route Separation
+## 3. Game speed context
 
-### 3.1 Puka Nacua vs. First-Round Sprinters
-We examine four wide receivers from the 2023–2024 classes:
-* **Puka Nacua** (Pick 177: 43 starts, 2× Pro Bowl, 1st-Team All-Pro).
-* **Jaxon Smith-Njigba** (Pick 20: 36 starts, Pro Bowl, 1st-Team All-Pro).
-* **Quentin Johnston** (Pick 21: 31 starts, rotational contributor).
-* **Brian Thomas Jr.** (Pick 23: 30 starts, vertical receiver).
+Across 18.1 million regular-season tracking frames:
 
-| Player | Pick | Status | Median Speed | CWB (10–26 km/h) | Peak Speed |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Puka Nacua** | 177 | All-Pro | $21.2\text{ km/h}$ | **63.5%** | $34.4\text{ km/h}$ |
-| **Jaxon Smith-Njigba** | 20 | All-Pro | **$24.0\text{ km/h}$** | $55.4\%$ | $28.8\text{ km/h}$ |
-| **Brian Thomas Jr.** | 23 | Starter | $21.3\text{ km/h}$ | $56.0\%$ | $38.0\text{ km/h}$ |
-| **Quentin Johnston** | 21 | Rotational | $21.2\text{ km/h}$ | $53.9\%$ | $34.1\text{ km/h}$ |
+* **Median speed: 2.06 yd/s (6.8 km/h).** The 95th percentile is 6.66 yd/s (21.9 km/h).
+* **66% of frames are below 10 km/h**, 32% are between 10 and 26 km/h, and **1.5% are above 26 km/h**.
+* Top-end speed is still common at the snap level: **7.0% of player-snaps** reach 26 km/h at some point.
 
-![Figure 1: WR Speed PDF & CDF Comparison](wr_speed_pdf_cdf.png)
-
-### 3.2 What the PDF and CDF Reveal
-In **Figure 1 (Left)**, Puka Nacua's density concentrates tightly between $20\text{ and }23\text{ km/h}$, with $63.5\%$ of drill frames in the Core Working Band. Brian Thomas Jr. exhibits a long right tail to $38.0\text{ km/h}$—an asset rarely engaged in standard route trees.
-
-In **Figure 1 (Right)**, Jaxon Smith-Njigba's CDF shifts furthest right in the operating corridor: he never reached $29\text{ km/h}$ at the Combine, yet maintained the highest median cutting drill speed ($24.0\text{ km/h}$). He generated separation by preserving velocity through breaks rather than sprinting faster in a straight line.
+Football is mostly played at moderate speed, so movement quality through a cut is a sensible thing to measure. Whether it predicts careers is the empirical question.
 
 ---
 
-## 4. Biomechanical Analysis: Route Stem & Break Kinematics
+## 4. Main result: the raw signal is the draft board
 
-To test whether high cut speed reflects elite technique or sloppy, rounded routes, we analyze 10 Hz trajectories during the Comeback Route drill (`COMEBACK_ROUTE_RIGHT`). The receiver drives an 18-yard stem and cuts back at $135^\circ$.
+![Test statistic for every model, before and after draft controls](draft_controls.png)
 
-![Figure 2: Regulation NFL Field Kinematics](route_kinematics_field_plot.png)
+**Figure 1** shows each model's test statistic (coefficient ÷ standard error). Blue is the Combine metric alone and orange adds draft controls; the shaded band is not significant at 5%. Every volume outcome that starts outside the band moves into it.
 
-We compute trajectory curvature $\kappa(t)$ and finite-difference braking rate:
-$$\kappa(t) = \frac{|\dot{x}\ddot{y} - \dot{y}\ddot{x}|}{(\dot{x}^2 + \dot{y}^2)^{3/2}}, \quad \text{Braking Rate} = \min_{t}\left(\frac{s(t) - s(t-\Delta t)}{\Delta t}\right)$$
+| Metric → outcome | Metric alone | + draft controls |
+|:--|:-:|:-:|
+| WR $s_{\text{cut}}$ → career snaps (per km/h) | **+114, p = 0.002** | −10, p = 0.74 |
+| WR $s_{\text{cut}}$ → starter, 10+ starts (odds ratio per km/h) | **1.63, p = 0.026** | 1.11, p = 0.76 |
+| DL $\gamma_{\text{OE}}$ (all drills) → starter (odds ratio) | **1.85, p = 0.042** | 1.52, p = 0.35 |
+| DB break speed → career snaps (per km/h) | **+192, p = 0.011** | −15, p = 0.80 |
+| OL $\gamma_{\text{OE}}$ → career snaps | **+155, p = 0.015** | +58, p = 0.32 |
 
-In **Figure 2**:
-* **Puka Nacua:** Reaches break point at $X = 42.1\text{ yd}$ with peak braking of **$-5.77\text{ yd/s}^2$**. He absorbs $708\text{ kg}\cdot\text{m/s}$ of momentum in $0.8\text{ s}$ across two strides, holding curvature at $\kappa = 0.398\text{ m}^{-1}$ to exit at $17.8\text{ km/h}$.
-* **Quentin Johnston:** Displays peak braking of **$-5.23\text{ yd/s}^2$**, requiring $1.0\text{ s}$ to decelerate. His path collapses into a sharp hitch ($\kappa = 0.973\text{ m}^{-1}$), dropping exit speed to $12.4\text{ km/h}$.
+*OLS with heteroskedasticity-robust (HC1) standard errors; logit for starter status.*
 
-Top performers do not round routes. They generate greater eccentric braking impulse ($\int \mathbf{F}_{\text{brake}}\,dt$) to reverse direction while conserving kinetic energy.
+**Why it collapses.** Teams already see what the sensors see. Receivers with faster cutting-drill speed are drafted earlier ($s_{\text{cut}}$ on log pick: p = 0.012), so cut speed and draft slot carry the same information. The tier split makes it concrete:
 
----
+| WR tier (career starts) | N | Mean $s_{\text{cut}}$ | Mean draft pick (UDFA = 262) | Undrafted |
+|:--|:-:|:-:|:-:|:-:|
+| Top (20+) | 14 | 18.03 km/h | 62 | 0% |
+| Middle (3–19) | 40 | 17.19 km/h | 116 | 10% |
+| Fringe (0–2) | 52 | 16.53 km/h | 184 | 50% |
 
-## 5. Full Cohort Econometric Models
+The raw tier gap is large (Welch t = 4.75, p < 0.001, Cohen's d = 1.00). But half the fringe tier went undrafted, and undrafted receivers rarely get starts whatever their cut speed. Within draft slot and class, cut speed does not separate starters from non-starters.
 
-We analyze all 106 Combine wide receivers participating in cutting drills, partitioned into three empirical tiers:
-1. **Top Performers ($N=16$):** Multi-year starters ($\ge 20$ starts), Pro Bowlers, and All-Pros.
-2. **Average Players ($N=38$):** Core contributors ($3\text{ to }19$ starts).
-3. **Fringe Prospects ($N=52$):** $\le 2$ career starts.
-
-| Performance Tier | N | Mean Cut Speed ($s_{\text{cut}}$) | Std Dev ($\sigma$) | Peak Sprint Speed |
-| :--- | :---: | :---: | :---: | :---: |
-| **Top Performers** | 16 | $17.84\text{ km/h}$ | $\pm 0.81\text{ km/h}$ | $28.81\text{ km/h}$ |
-| **Average Contributors** | 38 | $17.04\text{ km/h}$ | $\pm 1.29\text{ km/h}$ | $27.96\text{ km/h}$ |
-| **Fringe Prospects** | 52 | $16.30\text{ km/h}$ | $\pm 1.59\text{ km/h}$ | $27.31\text{ km/h}$ |
-
-Welch's two-sample $t$-test confirms a large, significant difference between Top and Fringe prospects ($t = 3.723, p = 0.00041$, Cohen's $d = 1.08$). Top receivers also exhibit half the standard deviation of fringe players.
-
-### 5.1 Career Playing Time Model (OLS)
-We regress career offensive snaps on in-cut speed and 40-yard dash time:
-$$\text{Snaps}_i = \beta_0 + \beta_1 (s_{\text{cut}, i}) + \beta_2 (\text{Forty}_i) + \epsilon_i$$
-
-| Variable | Coefficient | Std. Error | $t$-statistic | $p$-value | 95% Conf. Interval |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Intercept** | $+1199.43$ | $3120.64$ | $+0.384$ | $0.702$ | $[-4997, +7396]$ |
-| **In-Cut Speed ($s_{\text{cut}}$)** | $+132.09$ | $42.27$ | $+3.125$ | **$0.002$** | $[+48.1, +216.0]$ |
-| **40-Yard Dash** | $-642.09$ | $673.21$ | $-0.954$ | $0.343$ | $[-1979, +695]$ |
-
-*Dependent Variable: career_offensive_snaps | $R^2 = 0.114$ | $N = 96$*
-
-Controlling for in-cut mechanics, the 40-yard dash is statistically insignificant ($p = 0.343$). Each $+1.0\text{ km/h}$ preserved through cuts earns $+132.1$ career snaps ($p = 0.002$).
-
-### 5.2 NFL Starter Probability (Logit)
-We model the probability of becoming an established starter ($\ge 10$ starts):
-$$\ln\left(\frac{P_i}{1 - P_i}\right) = \alpha + \beta_1 (s_{\text{cut}, i}) + \beta_2 (\text{Forty}_i)$$
-
-| Variable | Coefficient | Std. Error | $z$-statistic | $p$-value | Odds Ratio |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Intercept** | $+16.544$ | $13.765$ | $+1.202$ | $0.229$ | — |
-| **In-Cut Speed ($s_{\text{cut}}$)** | $+0.569$ | $0.221$ | $+2.575$ | **$0.010$** | **1.77×** |
-| **40-Yard Dash** | $-6.092$ | $3.033$ | $-2.009$ | $0.045$ | $0.002×$ |
-
-*Pseudo $R^2 = 0.112$ | LLR $p = 0.0017$ | $N = 96$*
-
-Each $1.0\text{ km/h}$ increase in cut velocity preservation increases starter odds by $+77\%$ ($\text{OR} = 1.77, 95\%\text{ CI: } [1.15, 2.72]$).
+**Multiple testing.** The full design fits 22 controlled tests (`results/model_results.csv`). One falls below p = 0.05: DL $\gamma_{\text{OE}}$ (all drills) → career snaps, +85 per unit, p = 0.048. Chance alone predicts about one in 22. After Holm correction, none is significant.
 
 ---
 
-## 6. Trench Play & Classical Mechanics: Gamma-Over-Expected ($\gamma_{\text{OE}}$)
+## 5. What is left: two efficiency leads
 
-In trench play, peak speed is irrelevant; downs are decided within $1.5\text{ s}$ via acceleration ($\gamma$). However, evaluating acceleration directly violates Newton's Second Law ($\mathbf{F} = m\mathbf{a}$). Because greater mass implies greater inertia, peak acceleration decays with body weight.
+Snaps measure opportunity. Per-snap efficiency is closer to talent, and the coaching staff's investment matters less there. Two leads stand out, both just short of significance:
 
-We formulate **Gamma-Over-Expected ($\gamma_{\text{OE}}$)** by regressing 90th-percentile Combine acceleration ($\gamma$) on body weight:
-$$\mathbb{E}[\gamma_i \mid \text{Mass}_i] = \hat{\alpha} + \hat{\beta}(\text{Weight}_i), \quad \gamma_{\text{OE}, i} \equiv \gamma_{\text{observed}, i} - \mathbb{E}[\gamma_i \mid \text{Mass}_i]$$
+1. **Receivers: drill-standardised cut speed → yards per route run.** +0.32 YPRR per unit of $z_{\text{cut}}$ (about 1 SD), p = 0.058, N = 57 receivers with 100+ routes, after draft controls. The pooled $s_{\text{cut}}$ shows nothing (p = 0.56). The definition fix is what exposes the lead.
+2. **Defensive linemen: pass-rush-drill $\gamma_{\text{OE}}$ → starter.** Odds ratio 1.60, p = 0.059, after draft and position controls. Its link to pressure rate and get-off time is flat (p = 0.55 and 0.32), so the mechanism is unclear.
 
-![Figure 3: Mass vs. Instantaneous Acceleration Scatter](mass_vs_gamma_scatter.png)
-
-Modeling starter probability across 114 defensive linemen:
-$$\ln\left(\frac{P_i}{1 - P_i}\right) = \beta_0 + \beta_1 (\gamma_{\text{OE}, i}) + \beta_2 (\text{Weight}_i)$$
-
-| Variable | Coefficient | Std. Error | $z$-statistic | $p$-value | Odds Ratio |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Intercept** | $-2.652$ | $2.315$ | $-1.145$ | $0.252$ | — |
-| **Gamma-Over-Expected ($\gamma_{\text{OE}}$)** | $+0.615$ | $0.302$ | $+2.035$ | **$0.042$** | **1.85×** |
-| **Combine Weight** | $+0.004$ | $0.008$ | $+0.504$ | $0.614$ | $1.00×$ |
-
-Mass-adjusted acceleration is statistically significant ($p = 0.042, \text{OR} = 1.85$). Each $+1.0\text{ km/h/s}$ of $\gamma_{\text{OE}}$ increases starter odds by $+85\%$, explaining why Braden Fiske ($292\text{ lbs}, \gamma_{\text{OE}} = +2.37$) and Laiatu Latu ($259\text{ lbs}, \gamma_{\text{OE}} = +1.70$) became immediate multi-year starters.
+Separation at the throw, the in-game outcome closest to "cutting", shows no positive link. Raw pooled $s_{\text{cut}}$ is in fact slightly *negative* (−0.08 yd per km/h, p = 0.013), weakening to p = 0.16 after controls. Faster cutters are not measurably more open when the ball is thrown.
 
 ---
 
-## 7. Actionable Draft Decision Rules
+## 6. Case studies: what one rep can and cannot show
 
-We summarize three decision rules for front offices:
+| Receiver | Pick | Starts | All-Pro 1st / Pro Bowls | $s_{\text{cut}}$ | $z_{\text{cut}}$ | Cutting drills run | YPRR |
+|:--|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Puka Nacua | 177 | 43 | 1 / 2 | 18.1 | +0.29 | 4 | 3.26 |
+| Jaxon Smith-Njigba | 20 | 36 | 1 / 1 | 19.6 | +0.34 | 2 | 2.33 |
+| Brian Thomas Jr. | 23 | 30 | 0 / 0 | 18.6 | +0.42 | 4 | 2.08 |
+| Quentin Johnston | 21 | 31 | 0 / 0 | 16.9 | −0.12 | 4 | 1.43 |
 
-| Position Group | Metric | Threshold | Front Office Decision |
-| :--- | :--- | :--- | :--- |
-| **Wide Receivers** | In-Cut Speed ($s_{\text{cut}}$) | $s_{\text{cut}} \ge 17.0\text{ km/h}$ | Clear for Day 1/2 selection |
-| **Wide Receivers** | In-Cut Speed ($s_{\text{cut}}$) | $s_{\text{cut}} < 16.0\text{ km/h}$ | Do not select on Days 1/2 |
-| **Pass Rushers** | Gamma-Over-Expected ($\gamma_{\text{OE}}$) | $\gamma_{\text{OE}} \ge +1.50\text{ km/h/s}$ | Priority target (Day 2/3 value) |
-| **Pass Rushers** | Gamma-Over-Expected ($\gamma_{\text{OE}}$) | $\gamma_{\text{OE}} < -1.00\text{ km/h/s}$ | Flag for low explosive force |
-| **All Prospects** | Core Band Occupancy | $\text{Occupancy} \ge 60\%$ | High regular-season translatability |
+![Cutting-drill speed density and CDF for the four receivers](wr_speed_pdf_cdf.png)
 
-1. **The Workout Warrior Filter (WR):** If a receiver runs sub-4.40 but records $s_{\text{cut}} < 16.0\text{ km/h}$, do not draft on Day 1 or Day 2. Their starter probability is $<18\%$.
-2. **The Trench Multiplier (DL/OL):** Target $290+\text{ lb}$ linemen with $\gamma_{\text{OE}} > +1.5\text{ km/h/s}$. Their mass-normalized force generates immediate pocket disruption regardless of baseline 40 time.
-3. **Draft Density Over Tails:** Prioritize athletes whose speed density concentrates in the $10\text{--}26\text{ km/h}$ Core Working Band over straight-line sprinters with unutilized high-speed tails.
+Nacua, a Day-3 pick turned All-Pro, is the case a tracking metric would want to explain. His $z_{\text{cut}}$ is above average but below Thomas Jr.'s, so cut speed alone would not have flagged him as the standout.
+
+![Comeback route, Nacua vs Johnston](route_kinematics_field_plot.png)
+
+On the comeback route (one rep each, **Figure 3**), the two enter the break almost identically:
+
+* **Into the break:** stem peaks of 27.6 and 27.1 km/h, slowest points of 12.2 and 12.4 km/h.
+* **Braking:** each sheds about 385–390 kg·m/s of momentum. Peak braking is −5.77 vs −5.23 yd/s².
+* **Out of the break:** this is where they differ. One second after his slowest frame Nacua is back to **22.7 km/h**; Johnston is at **15.7 km/h** and slowing.
+* **Shape:** the paths differ too. Nacua's rep breaks back toward the line of scrimmage; Johnston's turns closer to 90°.
+
+Re-acceleration out of the break is a promising feature, but **a single rep per player is an anecdote**, not evidence.
+
+![Defensive-line mass vs 90th-percentile acceleration](mass_vs_gamma_scatter.png)
+
+**Figure 4** shows why mass adjustment matters: weight explains 29% of acceleration variance (−0.019 km/h/s per lb). Braden Fiske (+2.37), Laiatu Latu (+1.70) and Gervon Dexter (+1.58) sit well above expectation, and all became starters (24, 17 and 33 starts). They were also picks 39, 15 and 53, which is why $\gamma_{\text{OE}}$ adds little once draft slot is known.
 
 ---
 
-## 8. Conclusion & Open-Source Deliverables
+## 7. How a front office should use this
 
-Continuous 10 Hz RFID tracking eliminates the epistemic limitations of stopwatch scouting. Velocity preservation through cuts and mass-adjusted explosive acceleration reliably differentiate NFL starters from fringe prospects.
+1. **Don't read raw tracking-to-snaps correlations as evidence.** Draft slot explains 51% of receiver snap variance; adding cut speed raises it to 51.3%. Any metric must be tested *conditional on draft position*.
+2. **Standardise within the drill.** Pooled medians mix drills a prospect did or did not run. A within-drill z-score is the minimum fix.
+3. **Judge on per-snap efficiency, not volume.** Snaps and starts reflect the draft investment. YPRR, pressure rate and separation are the outcomes a Combine metric should move.
+4. **Pre-register the two leads on the 2026 class.** Fix the definitions now ($z_{\text{cut}}$ → YPRR; pass-rush-drill $\gamma_{\text{OE}}$ → starter), then test once on the new class. A confirmed effect would be the first tracking metric shown to add information beyond the draft board.
 
-All analytical pipelines, interactive field viewers, and presentation materials are available in the repository:
-* **Interactive Field Tracking:** [`route_playback_interactive.html`](route_playback_interactive.html)
-* **Cohort Density Viewer:** [`tier_comparison_pdf_cdf.html`](tier_comparison_pdf_cdf.html)
-* **LaTeX Beamer Deck:** [`presentation.pdf`](presentation.pdf)
-* **Formal Research Paper:** [`report_assigned.pdf`](report_assigned.pdf)
-* **Replication Code:** Fully documented in `scripts/`.
+**Limitations.** Careers are one to three seasons long. Efficiency samples are small (57 receivers, 69 rushers). Each player has a single tracked rep per drill. And `a` cannot separate acceleration from braking.
+
+---
+
+## 8. Reproducing
+
+```bash
+python scripts/extract_features.py
+python scripts/run_regressions.py   # writes results/
+python scripts/game_speed_distribution.py   # NFL_BDB_ZIP=<zip> if not extracted
+python scripts/make_field_plot.py
+python scripts/make_interactive_playback.py
+```
+
+Interactive views: [`route_playback_interactive.html`](route_playback_interactive.html), [`tier_comparison_pdf_cdf.html`](tier_comparison_pdf_cdf.html), [`speed_pdf_cdf_interactive.html`](speed_pdf_cdf_interactive.html). Formal write-up: [`report_assigned.pdf`](report_assigned.pdf). Slides: [`presentation.pdf`](presentation.pdf).
