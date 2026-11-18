@@ -14,3 +14,7 @@ data/*.parquet
 # Python cache
 __pycache__/
 *.pyc
+
+# Local ELI5 files
+eli5_summary.*
+
