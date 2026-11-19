@@ -5,7 +5,8 @@ Static publication figures (written to the repo root and copied to figures/):
   2. wr_speed_pdf_cdf.png            cutting-drill speed density, four case-study receivers
   3. route_kinematics_field_plot.png comeback route: paths and speed through the break
   4. mass_vs_gamma_scatter.png       mass vs 90th-percentile acceleration (DL)
-Run extract_features.py and run_regressions.py first.
+  5. play_level_cut_speed.png        within-player effect of speed through the cut on separation
+Run extract_features.py and run_regressions.py first (and play_level_fe.py for figure 5).
 """
 import os
 import shutil
@@ -144,6 +145,40 @@ def mass_gamma(dl):
     save(fig, "mass_vs_gamma_scatter.png")
 
 
+def play_level_effects():
+    """Within-player estimates: separation at the throw per 1 SD of speed held through the last cut."""
+    m = pd.read_csv(os.path.join(cm.RESULTS_DIR, "play_fe_models.csv"))
+    b = pd.read_csv(os.path.join(cm.RESULTS_DIR, "play_fe_robustness.csv"))
+    sel = lambda s: m[(m.treatment == "apex_z") & (m.outcome == "separation") & (m["sample"] == s)].iloc[0]
+    chk = lambda c: b[b.check == c].iloc[0]
+    rows = [("Receivers, all coverage (primary test)", sel("WR, all coverage"), BLUE),
+            ("Receivers, man coverage", sel("WR, man"), BLUE),
+            ("Receivers, zone coverage", sel("WR, zone"), BLUE),
+            ("Tight ends, all coverage", sel("TE, all coverage"), BLUE),
+            ("Controlling for speed going into the cut", chk("+ entry speed into the cut"), BLUE),
+            ("Cuts at least 0.6 s before the throw", chk("cut >= 0.6 s before the throw"), BLUE),
+            ("Single-cut plays only", chk("single-cut plays only"), BLUE),
+            ("Game fixed effects instead of opponent", chk("game FE instead of opponent x season"), BLUE),
+            ("Placebo: speed going into the cut, alone", chk("placebo: entry speed alone"), INK2)]
+    fig, ax = plt.subplots(figsize=(9.0, 4.6))
+    ax.axvline(0, color=INK2, lw=0.8)
+    for i, (label, r, color) in enumerate(rows):
+        y = len(rows) - 1 - i - (0.5 if i >= 4 else 0) - (0.5 if i == 8 else 0)
+        ax.plot([r.ci_lo, r.ci_hi], [y, y], color=color, lw=2, solid_capstyle="round", zorder=2)
+        ax.scatter([r.coef], [y], s=64, color=color, edgecolor=SURFACE, linewidth=2, zorder=3)
+        ax.text(r.ci_hi + 0.012, y, f"{r.coef:+.2f}", va="center", fontsize=8.5, color=INK2)
+        ax.text(-0.04, y, label, va="center", ha="right", fontsize=8.8, color=INK, transform=ax.get_yaxis_transform())
+    ax.set_yticks([])
+    ax.set_xlim(-0.12, 0.36)
+    ax.set_xlabel("Yards of separation at the throw per 1 SD of speed held through the last cut (95% CI)")
+    ax.set_title("Comparing each receiver with himself, holding speed through the cut goes with more separation",
+                 loc="left", fontsize=11, color=INK, x=-0.62, pad=22)
+    ax.text(-0.62, 1.025, "41 receivers, 4,450 regular-season routes; player, route, coverage, alignment, down and "
+            "opponent fixed effects; clustered by player", transform=ax.transAxes, fontsize=8.3, color=INK2)
+    ax.grid(axis="y", visible=False)
+    save(fig, "play_level_cut_speed.png")
+
+
 def make_all_plots():
     ct = cm.combine_tracking()
     wr = pd.read_parquet(os.path.join(cm.OUT_DIR, "features_wr.parquet"))
@@ -152,6 +187,7 @@ def make_all_plots():
     speed_pdf_cdf(ct)
     route_plot(ct, wr)
     mass_gamma(dl)
+    play_level_effects()
 
 
 if __name__ == "__main__":

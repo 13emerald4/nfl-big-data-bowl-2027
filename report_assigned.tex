@@ -56,7 +56,7 @@ where $\tilde s_{i,d}$ is player $i$'s median speed in drill $d$ and $D_i$ is th
 Weight explains 29\% of the variance in $\gamma$ ($\hat\beta = -0.019$ km/h/s per lb). The column $a$ is a magnitude, so $\gamma$ counts hard braking as well as burst. Pooled over all drills, $\gamma$ also correlates $0.36$ with the number of drills run. Thus we also compute $\gamma$ within the pass-rush drill, which all 118 linemen ran.
 
 \noindent\textbf{(b)}
-We describe regular-season game speed across 18.1 million tracking frames. The median speed is 2.06 yd/s (6.8 km/h) and the 95th percentile is 6.66 yd/s (21.9 km/h). Of all frames 66.3\% fall below 10 km/h, 32.2\% fall between 10 and 26 km/h, and 1.5\% exceed 26 km/h. At the snap level, 7.0\% of player-snaps reach 26 km/h at some point. Thus most football is played at moderate speed, and movement through a cut is a reasonable target for measurement.
+We describe regular-season game speed across 18.1 million tracking frames. The median speed is 6.8 km/h, and 66.3\% of frames fall below 10 km/h while 1.5\% exceed 26 km/h. Thus most football is played at moderate speed, and movement through a cut is a reasonable target for measurement.
 
 \newpage
 
@@ -102,17 +102,31 @@ Welch's two-sample test comparing Top and Fringe gives $t = 4.75$, $p < 0.001$, 
 \noindent\textbf{(c)}
 We account for multiple testing. Across all 22 controlled tests (six metrics; volume and efficiency outcomes), one has $p < 0.05$: DL $\gamma_{\text{OE}}$ (all drills) on career snaps, $+85$ snaps per km/h/s, $p = 0.048$. About one such result is expected by chance. Thus after Holm's correction no controlled effect is significant.
 
-\newpage
-
 \noindent\textbf{4.}
 \noindent\textbf{(a)}
-We test per-snap efficiency, which depends less on draft investment than snap counts do. Receivers need at least 100 regular-season routes ($N = 57$ with a 40 time) and linemen at least 100 pass rushes ($N = 69$). With draft controls, the drill-standardised score $z_{\text{cut}}$ raises yards per route run by $0.32$ per unit ($p = 0.058$); pooled $s_{\text{cut}}$ shows no effect ($p = 0.56$). Pass-rush-drill $\gamma_{\text{OE}}$ raises starter odds by a factor of $1.60$ ($p = 0.059$) but shows no link to pressure rate ($p = 0.55$) or get-off time ($p = 0.32$). Separation at the throw is not higher for faster cutters: the raw slope on $s_{\text{cut}}$ is $-0.08$ yd per km/h ($p = 0.013$), and $p = 0.16$ with controls. Thus two leads remain near the 5\% line, and the cutting-separation mechanism is not supported.
+We test per-snap efficiency, which depends less on draft investment than snap counts do. Receivers need at least 100 regular-season routes ($N = 57$ with a 40 time) and linemen at least 100 pass rushes ($N = 69$). With draft controls, the drill-standardised score $z_{\text{cut}}$ raises yards per route run by $0.32$ per unit ($p = 0.058$); pooled $s_{\text{cut}}$ shows no effect ($p = 0.56$). Pass-rush-drill $\gamma_{\text{OE}}$ raises starter odds by a factor of $1.60$ ($p = 0.059$) but shows no link to pressure rate ($p = 0.55$) or get-off time ($p = 0.32$). Separation at the throw is not higher for faster Combine cutters: the raw slope on $s_{\text{cut}}$ is $-0.08$ yd per km/h ($p = 0.013$), and $p = 0.16$ with controls. Thus two leads remain near the 5\% line, and Combine cut speed does not reach separation; part (c) shows why.
 
 \noindent\textbf{(b)}
 We rank every available predictor: draft slot, Combine results, NGS scores and the tracking metrics. For starter status we use cross-validated AUC (five folds, twenty repeats). Draft pick ranks first at every position (AUC 0.87 WR, 0.82 DL, 0.90 DB, 0.93 OL), followed by the NGS final and college-production scores. No predictor raises AUC by more than 0.01 over draft pick, apart from two small-sample DB cases. For efficiency we use rank correlations after removing draft pick (and edge versus interior for linemen). For receiver yards per route run the strongest is $z_{\text{cut}}$ ($+0.33$, $p = 0.008$). For pass-rush pressure rate the strongest are the NGS final score ($+0.36$, $p = 0.003$), the 10-yard split ($-0.29$, $p = 0.034$) and the 40 time ($-0.28$, $p = 0.038$). Seven of these 30 correlations fall below $p = 0.05$ where 1.5 are expected, but none survives Holm's correction. Thus Combine information appears in per-snap efficiency, not in playing time, and for pass rushers it includes the stopwatch.
 
 \noindent\textbf{(c)}
-We examine one comeback-route rep each for Puka Nacua (pick 177, 201 lb) and Quentin Johnston (pick 21, 208 lb). Both reach a stem peak near 27 km/h (27.6 and 27.1) and slow to about 12 km/h (12.2 and 12.4). Each sheds about 385--390 kg$\cdot$m/s of momentum, with peak braking of $-5.77$ and $-5.23$ yd/s$^2$. One second after his slowest frame Nacua is back at 22.7 km/h, while Johnston is at 15.7 km/h and slowing. Nacua's path breaks back toward the line; Johnston's turns closer to $90^\circ$. Thus re-acceleration out of the break is a candidate feature, but one rep per player is an illustration, not evidence.
+We test two ideas about the cut in three pre-registered stages: (1) holding speed through a change of direction relative to peers, and (2) horizontal force through the cut relative to body size. A cut is the slowest frame of a turn of at least $45^\circ$. The acceleration vector is rebuilt from smoothed positions, and force is $F = m\,a$, split into braking and turning components.
+
+\begin{center}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{p{0.24\textwidth}p{0.70\textwidth}}
+\toprule
+\textbf{Stage} & \textbf{Result} \\
+\midrule
+Combine $\to$ careers & Cut speed $\to$ YPRR $+0.35$ per SD, bootstrap $[-0.16, +0.85]$, HC3 $p = 0.21$, $N = 61$; force for size $\to$ snaps $+8.6\%$ per SD, $p = 0.17$ \\
+Combine $\to$ games & Spearman correlation with the same metric in games: cut speed $\rho = +0.01$ $[-0.23, +0.24]$; force $\rho = -0.18$ $[-0.35, -0.01]$ \\
+Within player, in games & Speed held through the last cut $\to$ separation at the throw: $+0.12$ yd per SD, wild cluster bootstrap $[+0.05, +0.19]$, $p = 0.003$; man coverage $+0.19$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A receiver's Combine cut speed agrees 0.58 between two reps of one drill but 0.03 between drills, whereas the in-game metrics (166,150 cuts) reach split-half reliability of 0.61--0.97. The same 80 receivers turn through similar angles in both settings (median $61^\circ$) but carry 17.6 km/h through Combine cuts against 10.0 km/h in games, so the unopposed drill measures a different movement. In the third stage each receiver is compared with himself over 4,450 routes, with route, coverage, alignment, down and opponent fixed effects, so draft slot, talent and size cannot explain the effect. With only 41 receivers, inference uses a wild cluster bootstrap and a Freedman--Lane permutation within receiver (both $p = 0.003$). The effect holds when speed into the cut is controlled and for cuts at least 0.6 s before the throw, and CV+ conformal intervals narrow where a within-receiver shuffle does not ($p = 0.005$). Each SD raises $P(\text{separation} > 2\text{ yd})$ by 4.6 points but leaves $P(> 4\text{ yd})$ unchanged, so the gain turns tight coverage into open targets. Turning force alone predicts nothing, and at equal speed it lowers separation ($-0.11$ yd per 100 N). Thus the skill is speed through the cut, it is visible in games but not in Combine drills, and the evidence is consistent with a causal effect, with play design and throw timing still uncontrolled.
 
 \noindent\textbf{5.}
 \noindent\textbf{(a)}
@@ -126,15 +140,15 @@ We summarise the guidance for front offices.
 \textbf{Practice} & \textbf{Reason} \\
 \midrule
 Test metrics conditional on draft slot & Draft variables explain 51\% of receiver snap variance; tracking adds 0.2 points \\
-Standardise within each drill & Pooled medians mix drills; Smith-Njigba's pooled median is 24.0 km/h, his cutting median 19.6 \\
-Judge on per-snap efficiency & Snaps and starts follow draft investment \\
+Do not scout cutting from Combine drills & One rep per drill; cut speed agrees 0.03 across drills and $\rho = +0.01$ with games \\
+Measure speed through the cut in games & $+0.12$ yd separation per SD within player; $+0.19$ against man coverage \\
 Keep the stopwatch for pass rushers & 10-yard split relates to pressure rate at a given pick and position ($p = 0.034$) \\
-Pre-register the leads for 2026 & $z_{\text{cut}} \to$ YPRR; 10-yard split $\to$ pressure rate; pass-rush $\gamma_{\text{OE}} \to$ starter \\
+Pre-register the leads for 2026 & Rookie-season cut speed $\to$ later YPRR; 10-yard split $\to$ pressure rate; $z_{\text{cut}} \to$ YPRR \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \noindent\textbf{(b)}
-We state the limitations. Careers span one to three seasons, efficiency samples are small, each drill has one tracked rep per player, and $a$ cannot separate acceleration from braking. Thus Combine tracking has not yet been shown to add information beyond the draft board. A pre-registered test on the 2026 class is the next step, with the leads defined in advance.
+We state the limitations. Careers span one to three seasons, efficiency samples are small, each drill has one tracked rep per player, and force is horizontal only. Thus Combine tracking has not been shown to add information beyond the draft board, while in-game tracking of the cut has. A pre-registered test on the 2026 class is the next step.
 
 \end{document}

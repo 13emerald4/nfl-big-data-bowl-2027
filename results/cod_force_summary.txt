@@ -1,0 +1,45 @@
+Change-of-direction speed and force -> NFL outcomes
+Plan: results/cod_force_preregistration.md; metrics: results/cod_reliability.txt
+
+PRIMARY TESTS (draft-controlled; Holm across the two)
+  cod_speed_z -> yprr (WR, N = 61, ols)
+    controlled: coef +0.353 [-0.159, +0.865], p = 0.177, Holm p = 0.335
+      per 1 SD: +0.353 yards per route [-0.159, +0.865]
+    alone:      coef +0.408 [-0.109, +0.926], p = 0.122
+    conformal 80%: coverage 0.80 -> 0.84; mean width 1.387 -> 1.345 (-3.0%); noise metric median +2.6%; permutation p = 0.030
+  force_oe_z -> snaps_per_season (ALL, N = 207, poisson)
+    controlled: coef +0.083 [-0.035, +0.201], p = 0.167, Holm p = 0.335
+      per 1 SD: +24.712 snaps per season [-10.373, +59.797]; +8.6% snaps
+    alone:      coef -0.034 [-0.190, +0.122], p = 0.667
+    conformal 80%: coverage 0.84 -> 0.82; mean width 594.104 -> 600.255 (+1.0%); noise metric median +1.1%; permutation p = 0.458
+
+EXPLORATORY (36 controlled tests; Holm within the family)
+  p < 0.05: 2 (expected by chance: 1.8); Holm p < 0.05: 0
+  turn_oe_z        -> snaps_per_season   ALL N=207  per SD +53.702 [+16.488, +90.916] snaps per season; p = 0.005, Holm 0.17
+  turn_oe_z        -> pressure_rate      DL  N= 26  per SD +0.010 [+0.003, +0.018] pressures per rush; p = 0.008, Holm 0.29
+  turn_oe_z        -> starter            ALL N=207  per SD +0.060 [-0.009, +0.129] probability of starting; p = 0.086, Holm 1.00
+  cod_retention_z  -> yprr               WR  N= 61  per SD +0.417 [-0.098, +0.931] yards per route; p = 0.112, Holm 1.00
+  force_oe_z       -> starter            ALL N=207  per SD +0.061 [-0.015, +0.138] probability of starting; p = 0.117, Holm 1.00
+  tc_cut_speed_z   -> snaps_per_season   ALL N=153  per SD +32.009 [-8.650, +72.669] snaps per season; p = 0.123, Holm 1.00
+  force_abs_z      -> starter            ALL N=207  per SD +0.136 [-0.041, +0.313] probability of starting; p = 0.132, Holm 1.00
+  fv_slope         -> pressure_rate      DL  N= 26  per SD -0.007 [-0.016, +0.002] pressures per rush; p = 0.133, Holm 1.00
+
+CONFORMAL (80% CV+ intervals; negative change = metric narrows intervals)
+  cod_speed_z      -> yprr               WR  N= 61  coverage 0.84  width -3.0% (noise +2.6%)  perm p = 0.030
+  force_oe_z       -> snaps_per_season   ALL N=207  coverage 0.82  width +1.0% (noise +1.1%)  perm p = 0.458
+  brake_oe_z       -> snaps_per_season   ALL N=207  coverage 0.84  width +1.4% (noise +1.1%)  perm p = 0.657
+  cod_exit_z       -> separation         WR  N= 75  coverage 0.83  width +1.1% (noise +1.6%)  perm p = 0.340
+  cod_exit_z       -> snaps_per_season   WR  N=105  coverage 0.83  width +3.5% (noise +2.7%)  perm p = 0.737
+  cod_exit_z       -> yprr               WR  N= 61  coverage 0.79  width +2.3% (noise +2.6%)  perm p = 0.450
+  cod_retention_z  -> separation         WR  N= 75  coverage 0.83  width +0.1% (noise +1.6%)  perm p = 0.174
+  cod_retention_z  -> snaps_per_season   WR  N=105  coverage 0.80  width +2.2% (noise +2.7%)  perm p = 0.362
+  cod_retention_z  -> yprr               WR  N= 61  coverage 0.80  width -0.2% (noise +2.6%)  perm p = 0.103
+  cod_speed_z      -> separation         WR  N= 75  coverage 0.84  width +2.5% (noise +1.6%)  perm p = 0.765
+  cod_speed_z      -> snaps_per_season   WR  N=105  coverage 0.83  width +3.6% (noise +2.7%)  perm p = 0.716
+  force_abs_z      -> snaps_per_season   ALL N=207  coverage 0.83  width +0.1% (noise +1.0%)  perm p = 0.115
+  force_per_kg_z   -> snaps_per_season   ALL N=207  coverage 0.83  width +0.9% (noise +1.0%)  perm p = 0.469
+  fv_f0            -> snaps_per_season   ALL N=207  coverage 0.82  width +1.8% (noise +1.0%)  perm p = 0.869
+  fv_slope         -> snaps_per_season   ALL N=207  coverage 0.83  width +2.3% (noise +1.0%)  perm p = 0.958
+  tc_cut_speed_z   -> snaps_per_season   ALL N=153  coverage 0.83  width +0.4% (noise +1.5%)  perm p = 0.157
+  turn_oe_z        -> snaps_per_season   ALL N=207  coverage 0.83  width +3.8% (noise +1.1%)  perm p = 0.998
+  permutation p < 0.05: 1 of 17

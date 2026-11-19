@@ -55,7 +55,7 @@
           \item All four headline metrics: significant alone ($p = 0.002$--$0.042$).
           \item All four after draft controls: \textbf{not significant} ($p = 0.32$--$0.80$).
           \item Draft slot explains \textbf{51\%} of WR snap variance; tracking adds \textbf{0.2 points}.
-          \item Two per-snap efficiency leads at $p \approx 0.06$: test them on the 2026 class.
+          \item In games, holding speed through a cut buys separation: \textbf{+0.12 yd per SD} within player (wild bootstrap $p = 0.003$). The Combine drills do not measure it.
         \end{itemize}
       \end{block}
     \end{column}
@@ -144,33 +144,6 @@
 \end{frame}
 
 % 6
-\begin{frame}{What Is Left: Two Per-Snap Efficiency Leads}
-  \begin{columns}[T]
-    \begin{column}{0.5\textwidth}
-      \begin{block}{\textbf{WR: $z_{\text{cut}}$ $\to$ yards per route run}}
-        \small
-        $+0.32$ YPRR per unit, $p = 0.058$, $N = 57$ (100+ routes), after draft controls.\\
-        Pooled $s_{\text{cut}}$: nothing ($p = 0.56$). The drill fix exposes the lead.
-      \end{block}
-      \begin{block}{\textbf{DL: pass-rush-drill $\gamma_{\text{OE}}$ $\to$ starter}}
-        \small
-        Odds ratio $1.60$, $p = 0.059$, after draft and position controls.\\
-        But flat on pressure rate ($p = 0.55$) and get-off ($p = 0.32$).
-      \end{block}
-    \end{column}
-    \begin{column}{0.48\textwidth}
-      \begin{block}{\textbf{No support for the separation story}}
-        \small
-        Separation at the throw does not rise with cut speed: raw slope $-0.08$ yd per km/h ($p = 0.013$), $p = 0.16$ with controls.
-      \end{block}
-      \vspace{0.4em}
-      \small
-      Both leads sit just above $p = 0.05$ in a family of 22 tests. They are hypotheses for a pre-registered test, not draft rules.
-    \end{column}
-  \end{columns}
-\end{frame}
-
-% 7
 \begin{frame}{Case Study: Same Brake, Different Exit}
   \begin{center}
     \includegraphics[width=0.9\textwidth]{route_kinematics_field_plot.png}
@@ -183,19 +156,41 @@
   \end{itemize}
 \end{frame}
 
-% 8
-\begin{frame}{Defensive Line: Mass-Adjusted Acceleration}
-  \begin{columns}[c]
-    \begin{column}{0.56\textwidth}
-      \includegraphics[width=\textwidth]{mass_vs_gamma_scatter.png}
+% 7
+\begin{frame}{Speed Through the Cut: Visible in Games, Not at the Combine}
+  \vspace{-0.2cm}
+  \begin{center}
+    \includegraphics[width=0.86\textwidth]{play_level_cut_speed.png}
+  \end{center}
+  \vspace{-0.3cm}
+  \footnotesize
+  \begin{columns}[T]
+    \begin{column}{0.32\textwidth}
+      \textbf{1. Combine $\to$ careers:} cut speed $\to$ YPRR $+0.35$/SD (bootstrap CI spans 0); force for size $\to$ snaps ($p = 0.17$).
     \end{column}
-    \begin{column}{0.44\textwidth}
-      \small
-      \begin{itemize}
-        \item Weight explains 29\% of $\gamma$ ($-0.019$ km/h/s per lb), so residualising is right.
-        \item Fiske (+2.37), Latu (+1.70), Dexter (+1.58): all starters (24, 17, 33 starts).
-        \item They were also picks 39, 15 and 53. Once pick is known, $\gamma_{\text{OE}}$ adds little: starter OR $1.85 \to 1.52$ ($p = 0.35$).
-      \end{itemize}
+    \begin{column}{0.32\textwidth}
+      \textbf{2. Combine $\to$ games:} Spearman $\rho = +0.01$ for cut speed, $-0.18$ for force. Combine cut speed agrees 0.03 across drills.
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \textbf{3. Within player, in games:} \textbf{+0.12 yd} per SD (wild bootstrap $p = 0.003$), \textbf{+0.19} vs man; within-receiver permutation $p = 0.003$.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% 8
+\begin{frame}{Where the Gain Sits, and Why the Combine Misses It}
+  \vspace{-0.2cm}
+  \begin{center}
+    \includegraphics[width=0.97\textwidth]{separation_distribution.png}
+  \end{center}
+  \vspace{-0.3cm}
+  \footnotesize
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \textbf{Tight to open, not wide open.} Per SD of speed through the cut: $P(\text{sep} > 1, 2, 3\text{ yd})$ $+3.6$, $+4.6$, $+3.9$ points; $P(> 4\text{ yd})$ unchanged. Turning force is not the lever: at equal speed it costs separation.
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \textbf{A different movement.} The same 80 receivers turn through similar angles (median $61^\circ$) but carry \textbf{17.6 km/h} through Combine cuts vs \textbf{10.0 km/h} in games. Unopposed drills do not measure cutting against a defender.
     \end{column}
   \end{columns}
 \end{frame}
@@ -231,13 +226,13 @@
   \small
   \begin{enumerate}
     \item \textbf{Test conditional on draft slot.} A raw link to snaps or starts mostly restates the draft board.
-    \item \textbf{Standardise within each drill.} Prospects run different drill sets; pooled medians mix them.
-    \item \textbf{Judge on per-snap efficiency}, not snap volume.
+    \item \textbf{Don't scout cutting from Combine drills.} One rep per drill is drill-specific and does not track game behaviour.
+    \item \textbf{Measure speed through the cut in games}, rookie and college tracking included; it buys separation, most against man coverage.
     \item \textbf{Keep the stopwatch for pass rushers.} Short-area speed relates to pressure rate beyond draft slot.
-    \item \textbf{Pre-register the leads on the 2026 class:} $z_{\text{cut}} \to$ YPRR; 10-yard split $\to$ pressure rate; pass-rush $\gamma_{\text{OE}} \to$ starter.
+    \item \textbf{Pre-register on the 2026 class:} rookie-season cut speed $\to$ later YPRR; 10-yard split $\to$ pressure rate; $z_{\text{cut}} \to$ YPRR.
   \end{enumerate}
   \footnotesize
-  \textbf{Limitations:} 1--3 seasons of careers; small efficiency samples (57 receivers, 69 rushers); one tracked rep per drill; $a$ cannot separate acceleration from braking.
+  \textbf{Limitations:} 1--3 seasons of careers; small efficiency samples; one tracked rep per drill; horizontal force only; play-level confounding remains.
   Every number is printed by the scripts in \texttt{scripts/}; results in \texttt{results/}.
   \vspace{0.3em}
   \begin{center}

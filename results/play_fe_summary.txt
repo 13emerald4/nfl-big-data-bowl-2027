@@ -1,0 +1,37 @@
+Play-level fixed-effects test: last cut before the throw -> separation at the throw
+Plan: results/play_fe_preregistration.md
+
+Receivers: 41 players, 4,450 plays (median 79 per player); man coverage 32%
+Tight ends: 17 players, 1,335 plays
+Separation: mean 2.96 yd, SD 2.01; turning force mean 435 N, within-player SD 139 N; apex_z within-player SD 0.96
+Correlation of apex_z and turning force within play: +0.59
+
+ESTIMATES (player FE + route, coverage, alignment, down, opponent x season FE; clustered by player)
+  PRIMARY apex_z               WR, all coverage   plays= 4450  +0.120 yd separation per 1 SD [+0.050, +0.191], p = 0.001, Holm 0.002
+  PRIMARY turn_force           WR, all coverage   plays= 4450  -0.008 yd separation per 100 N [-0.071, +0.054], p = 0.793, Holm 0.793
+          apex_z               WR, man            plays= 1407  +0.194 yd separation per 1 SD [+0.107, +0.280], p = 0.000, Holm 0.000
+          apex_z               WR, zone           plays= 3043  +0.080 yd separation per 1 SD [-0.025, +0.185], p = 0.137, Holm 0.546
+          turn_force           WR, man            plays= 1407  +0.103 yd separation per 100 N [+0.034, +0.172], p = 0.004, Holm 0.021
+          turn_force           WR, zone           plays= 3043  -0.062 yd separation per 100 N [-0.144, +0.021], p = 0.144, Holm 0.546
+          apex_z               WR, all coverage   plays= 4450  +0.030 probability of target per 1 SD [+0.011, +0.049], p = 0.002, Holm 0.014
+          turn_force           WR, all coverage   plays= 4450  +0.037 probability of target per 100 N [+0.023, +0.052], p = 0.000, Holm 0.000
+          apex_z               TE, all coverage   plays= 1335  +0.144 yd separation per 1 SD [+0.039, +0.249], p = 0.007, Holm 0.035
+          turn_force           TE, all coverage   plays= 1335  +0.067 yd separation per 100 N [-0.038, +0.173], p = 0.210, Holm 0.546
+          apex_z (joint)       WR, all coverage   plays= 4450  +0.213 yd separation per 1 SD [+0.140, +0.286], p = 0.000, Holm 0.000
+          turn_force (joint)   WR, all coverage   plays= 4450  -0.114 yd separation per 100 N [-0.180, -0.047], p = 0.001, Holm 0.007
+          apex_z (joint)       WR, man            plays= 1407  +0.183 yd separation per 1 SD [+0.070, +0.296], p = 0.001, Holm 0.012
+          turn_force (joint)   WR, man            plays= 1407  +0.013 yd separation per 100 N [-0.077, +0.102], p = 0.784, Holm 0.784
+
+ROBUSTNESS (post hoc, not in the plan; WR separation, per 1 SD)
+  plan model (reference)                 apex_z   plays= 4450  +0.120 [+0.050, +0.191], p = 0.001
+  + entry speed into the cut             apex_z   plays= 4450  +0.128 [+0.038, +0.217], p = 0.005
+  + entry speed, man coverage            apex_z   plays= 1407  +0.164 [+0.018, +0.310], p = 0.028
+  placebo: entry speed alone             entry_z  plays= 4450  +0.088 [-0.007, +0.183], p = 0.070
+  cut >= 0.3 s before the throw          apex_z   plays= 3418  +0.134 [+0.054, +0.214], p = 0.001
+  cut >= 0.6 s before the throw          apex_z   plays= 2663  +0.111 [+0.020, +0.201], p = 0.016
+  single-cut plays only                  apex_z   plays= 4104  +0.108 [+0.034, +0.182], p = 0.004
+  game FE instead of opponent x season   apex_z   plays= 4450  +0.132 [+0.054, +0.210], p = 0.001
+
+CONFORMAL (80% CV+ intervals for separation; WR, all coverage)
+  apex_z     coverage 0.81 -> 0.80; width 4.386 -> 4.368 yd (-0.40%; noise +0.03%), perm p = 0.005
+  turn_force coverage 0.81 -> 0.81; width 4.386 -> 4.390 yd (+0.09%; noise +0.03%), perm p = 0.950

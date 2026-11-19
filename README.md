@@ -29,7 +29,16 @@ Combine tracking metrics correlate with NFL playing time, but almost entirely be
   * pass-rush-drill γ_OE → starter (odds ratio 1.60, p = 0.059).
   
   They are candidates for a pre-registered test on the 2026 class, not draft rules.
-* Separation at the throw does **not** rise with cut speed.
+* **Speed through the cut, in three pre-registered stages** (`results/*_preregistration.md`):
+  * **Combine → careers:** cut speed → YPRR +0.35 per SD (p = 0.18); size-adjusted force → snaps (p = 0.17). Not significant.
+  * **Combine → games:** the Combine metrics do not track the same quantities measured in 166,150 in-game cuts (cut speed r = +0.02, force r = −0.16). Combine cut speed agrees only 0.03 across drills.
+  * **Within player, in games:** holding speed through the last cut before the throw goes with **+0.12 yd of separation per SD** (Holm p = 0.002; +0.19 vs man coverage; +3 points target rate), comparing each receiver with himself over 4,450 routes. Turning force is not the lever.
+  * The skill is real, but Combine drills don't measure it.
+  * **Checks that don't rely on normal approximations** (`scripts/distribution_checks.py`):
+    * A wild cluster bootstrap gives CI [+0.05, +0.19], p = 0.003.
+    * Within-receiver Freedman–Lane permutation gives p = 0.003.
+    * Spearman transfer correlations: ρ = +0.01 and −0.18.
+  * **Where the gain sits:** P(separation > 1, 2, 3 yd) rises by 3.6–4.6 points per SD, while P(> 4 yd) is unchanged. Holding speed turns tight coverage into open targets, not wide-open ones.
 * **Predictor ranking** (`scripts/rank_predictors.py`):
   * **Playing time:** draft pick ranks first at every position (starter AUC 0.82–0.93), then the NGS final and college-production scores. Nothing adds to draft pick out of sample.
   * **Per-snap efficiency:** the strongest signals beyond draft slot are drill-standardised cut speed for receiver YPRR (+0.33, p = 0.008), and the NGS final score (+0.36) and 10-yard split (−0.29, p = 0.034) for pass-rush pressure rate.
@@ -41,17 +50,21 @@ Combine tracking metrics correlate with NFL playing time, but almost entirely be
 
 | Artifact | Description |
 | :--- | :--- |
-| [`REPORT.md`](./REPORT.md) / [`REPORT.html`](./REPORT.html) / [`REPORT.pdf`](./REPORT.pdf) | Competition write-up (< 2,000 words, 4 figures, 5 tables) |
+| [`REPORT.md`](./REPORT.md) / [`REPORT.html`](./REPORT.html) / [`REPORT.pdf`](./REPORT.pdf) | Competition write-up as a research paper with abstract (< 2,000 words excluding references and appendix, 5 figures + 1 appendix figure, 4 tables) |
 | [`report_assigned.pdf`](./report_assigned.pdf) | 4-page formal report (LaTeX) |
 | [`presentation.pdf`](./presentation.pdf) | 10-slide Beamer deck |
 | [`draft_controls.png`](./draft_controls.png) | Test statistic for every model, before vs after draft controls |
 | [`wr_speed_pdf_cdf.png`](./wr_speed_pdf_cdf.png) | Cutting-drill speed density and CDF for four case-study receivers |
 | [`route_kinematics_field_plot.png`](./route_kinematics_field_plot.png) | Comeback route: Nacua vs Johnston paths and speed through the break |
 | [`mass_vs_gamma_scatter.png`](./mass_vs_gamma_scatter.png) | Defensive-line weight vs 90th-percentile acceleration |
+| [`play_level_cut_speed.png`](./play_level_cut_speed.png) | Within-player effect of speed through the cut on separation |
+| [`separation_distribution.png`](./separation_distribution.png) | Adjusted separation PDF/CDF by the receiver's own cut speed, and effects on P(separation > c) |
+| [`combine_vs_game_cuts.png`](./combine_vs_game_cuts.png) | CDFs of cut speed and turn angle for the same receivers, Combine vs games |
+| [`permutation_nulls.png`](./permutation_nulls.png) | Within-receiver permutation null distributions (appendix) |
 | [`tier_comparison_pdf_cdf.html`](./tier_comparison_pdf_cdf.html) | Interactive: cutting-drill speed by receiver career tier |
 | [`speed_pdf_cdf_interactive.html`](./speed_pdf_cdf_interactive.html) | Interactive: cutting-drill speed for the four case-study receivers |
 | [`route_playback_interactive.html`](./route_playback_interactive.html) | Interactive: 10 Hz comeback-route playback |
-| [`results/`](./results) | Model table (`model_results.csv`), descriptives and game-speed summary printed by the scripts |
+| [`results/`](./results) | Model tables, summaries and the three pre-registrations printed or written by the scripts |
 
 ---
 
@@ -67,7 +80,8 @@ Combine tracking metrics correlate with NFL playing time, but almost entirely be
   * Starter status (10+ starts).
   * Regular-season per-snap efficiency from `player_play.csv` (preseason and playoff snaps excluded): yards per route run, targets per route, separation at the throw, pressure rate, get-off time.
 * **Models.** OLS with HC1 robust standard errors, or logit for starter status. Each is fit raw and with $\log(\text{pick})$, a UDFA flag, draft-class fixed effects and (DL/DB/OL) position fixed effects. Holm correction is applied across the 22 controlled tests.
-* **Note on `a`.** The tracking column `a` is a magnitude, so acceleration percentiles include braking.
+* **Note on `a`.** The tracking column `a` is a magnitude, so acceleration percentiles include braking. The cut analyses rebuild the acceleration vector from smoothed positions (Savitzky–Golay) and split it into braking and turning force.
+* **Cut analyses.** A cut is the slowest frame of a turn of 45° or more. Combine and game cuts are measured identically. The within-player test regresses separation at the throw on the last cut's speed (z-scored within route and turn angle), with player, route, coverage, alignment, down and opponent fixed effects and player-clustered errors. Conformal checks use CV+ intervals with permutation tests.
 
 ---
 
@@ -85,6 +99,12 @@ nfl-big-data-bowl-2027/
 │   ├── extract_features.py                # Combine features + in-game efficiency
 │   ├── run_regressions.py                 # Every model, test and summary number
 │   ├── rank_predictors.py                 # Predictor ranking (playing time, efficiency)
+│   ├── cod_features.py                    # Combine cut speed and force metrics
+│   ├── cod_force_models.py                # Combine cut metrics -> careers (+ conformal)
+│   ├── game_cod_features.py               # In-game cuts from game tracking
+│   ├── transfer_test.py                   # Combine vs in-game cut metrics
+│   ├── play_level_fe.py                   # Within-player play-level test
+│   ├── distribution_checks.py             # Wild bootstrap, permutations, distribution regression, PDF/CDF figures
 │   ├── game_speed_distribution.py         # Regular-season speed distribution
 │   ├── make_field_plot.py                 # Static figures
 │   └── make_interactive_playback.py       # Plotly widgets
@@ -104,7 +124,13 @@ unzip ../data/nfl-big-data-bowl-2027.zip -d ../data/
 python scripts/extract_features.py
 python scripts/run_regressions.py
 python scripts/rank_predictors.py
-python scripts/game_speed_distribution.py      # or set NFL_BDB_ZIP to read tracking from the zip
+python scripts/cod_features.py
+python scripts/cod_force_models.py
+python scripts/game_cod_features.py            # or set NFL_BDB_ZIP to read tracking from the zip
+python scripts/transfer_test.py
+python scripts/play_level_fe.py
+python scripts/distribution_checks.py          # slow: ~30 min (conformal shuffles)
+python scripts/game_speed_distribution.py
 python scripts/make_field_plot.py
 python scripts/make_interactive_playback.py
 ```

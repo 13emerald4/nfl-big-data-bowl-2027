@@ -69,9 +69,11 @@ def player_base():
     return df
 
 
-def player_play_regular_season():
-    """Per-snap game records, regular season only. 'NA' strings become missing."""
-    pp = pd.read_csv(path("player_play.csv"), keep_default_na=False, na_values=["", "NA"], low_memory=False)
+def player_play_regular_season(usecols=None):
+    """Per-snap game records, regular season only. 'NA' strings become missing.
+    Pass usecols (must include game_id) to keep memory low."""
+    pp = pd.read_csv(path("player_play.csv"), keep_default_na=False, na_values=["", "NA"], low_memory=False,
+                     usecols=usecols)
     games = pd.read_csv(path("games.csv"))
     reg = set(games.loc[games["season_type"] == "REG", "game_id"])
     return pp[pp["game_id"].isin(reg)].copy()

@@ -1,0 +1,42 @@
+Change-of-direction metrics (drill data only; no outcomes read)
+
+Cuts detected: 2,611 in 1,187 reps
+                         reps  cuts  cuts_per_rep  median_turn  median_apex_ms
+drill                                                                         
+COMEBACK_ROUTE_RIGHT      110   161          1.46       100.50            2.39
+CURL_ROUTE_RIGHT          107   205          1.92       105.83            1.94
+DAGGER_ROUTE_LEFT         106   149          1.41        50.79            6.10
+POST_CORNER_ROUTE_LEFT     66    90          1.36        52.49            6.01
+POST_CORNER_ROUTE_RIGHT    19    21          1.11       150.90            1.42
+SHORT_SHUTTLE             213   511          2.40       174.99            0.32
+SLANT_ROUTE_LEFT           40    43          1.08        72.47            2.03
+SLOT_SAIL_ROUTE_RIGHT     102   182          1.78        55.88            5.87
+SLOT_STRIKE_ROUTE_LEFT    102   252          2.47       136.80            1.12
+SPEED_OUT_ROUTE_LEFT      123   180          1.46        58.42            5.37
+THREE_CONE_DRILL          199   817          4.11       166.16            0.58
+
+Idea 1 receivers scored: 106 (>= 3 route drills); median 6 drills, 9 cuts each
+Idea 1 three-cone rounded-cut speed scored: 153 players (all positions)
+Idea 2 players scored: 207 (shuttle and/or three-cone); 116 ran both
+  SHORT_SHUTTLE: peak force = 194 N + 5.28 N per kg of body mass
+  THREE_CONE_DRILL: peak force = 23 N + 5.66 N per kg of body mass
+
+Force-velocity profile, median across players (N, 90th percentile within 0.5 s of a cut):
+      players  median_force_n
+band                         
+0-1       207           852.0
+1-2       207           809.0
+2-3       207           726.0
+3-4       183           652.0
+4+          6           556.0
+
+Idea 1 cut-speed z, odd vs even drills: r = 0.11 (N = 106), Spearman-Brown full-length reliability = 0.20
+Idea 1 retention_z, odd vs even drills: r = 0.05, Spearman-Brown = 0.10
+Idea 1 exit05_z, odd vs even drills: r = 0.08, Spearman-Brown = 0.14
+Idea 1 cut-speed z, rep 1 vs rep 2 of the same drill: r = 0.58 (N = 50 pairs)
+Idea 1 cut-speed z, mean correlation between two different drills: r = 0.03
+Idea 2 force over expected, shuttle vs three-cone: r = 0.14 (N = 116)
+Idea 2 absolute force, shuttle vs three-cone: r = 0.81
+Idea 2 absolute force, rep 1 vs rep 2 of the same drill: r = 0.86 (N = 76 pairs)
+Idea 2 force over expected, rep 1 vs rep 2 of the same drill: r = 0.38
+Idea 2 body mass explains 64% of peak-force variance

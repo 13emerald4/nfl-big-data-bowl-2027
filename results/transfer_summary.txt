@@ -1,0 +1,51 @@
+Combine -> game transfer of change-of-direction metrics
+Plan: results/transfer_preregistration.md
+
+In-game cuts: 166,150 from 399 players; 336 players with >= 30 cuts (median 292)
+           players   cuts  median_apex_ms  median_turn_deg  median_turn_force_n
+pos_group                                                                      
+DB              93  50357             1.0        91.300003           270.500000
+DL              72  27162             0.9        88.400002           330.600006
+LB              28  13204             1.1        91.099998           356.500000
+OL              91  61033             0.9        78.300003           320.500000
+RB               2     43             1.2        71.800003           360.200012
+TE              33   4122             1.5        72.800003           437.600006
+WR              80  10229             2.8        61.400002           447.500000
+
+Reliability (split-half, Spearman-Brown)
+  game  g_route_speed_z      0.61 (N = 46)
+  game  g_route_retention_z  0.74 (N = 46)
+  game  g_cut_speed_z        0.86 (N = 300)
+  game  g_force_oe_z         0.97 (N = 300)
+  game  g_turn_oe_z          0.96 (N = 300)
+  game  g_brake_oe_z         0.85 (N = 300)
+  game  g_force_n            0.97 (N = 300)
+  game  g_force_per_kg       0.99 (N = 300)
+  combine cod_speed_z        0.20
+  combine cod_retention_z    0.10
+  combine force_oe_z         0.24
+  combine turn_oe_z          0.33
+  combine brake_oe_z         0.17
+  combine force_abs_z        0.90
+  combine force_per_kg_z     0.34
+  combine tc_cut_speed_z     n/a
+
+TRANSFER (Pearson r, 95% CI; primary Holm across three)
+  PRIMARY cod_speed_z      vs g_route_speed_z      WR  N= 59  r = +0.02 [-0.24, +0.27], p = 0.905, Holm 1.000; disattenuated +0.05
+  PRIMARY force_oe_z       vs g_force_oe_z         ALL N=145  r = -0.16 [-0.32, +0.01], p = 0.054, Holm 0.163; disattenuated -0.33 (partial on position); plain r = -0.14
+  PRIMARY turn_oe_z        vs g_turn_oe_z          ALL N=145  r = -0.04 [-0.21, +0.12], p = 0.592, Holm 1.000; disattenuated -0.08 (partial on position); plain r = -0.06
+          cod_retention_z  vs g_route_retention_z  WR  N= 59  r = +0.10 [-0.16, +0.35], p = 0.430, Holm 0.922; disattenuated +0.39
+          tc_cut_speed_z   vs g_cut_speed_z        ALL N=105  r = -0.14 [-0.33, +0.05], p = 0.143, Holm 0.574; disattenuated n/a
+          brake_oe_z       vs g_brake_oe_z         ALL N=145  r = +0.09 [-0.08, +0.25], p = 0.307, Holm 0.922; disattenuated +0.22 (partial on position); plain r = +0.01
+          force_abs_z      vs g_force_n            ALL N=145  r = -0.24 [-0.39, -0.08], p = 0.004, Holm 0.018; disattenuated -0.26
+          force_per_kg_z   vs g_force_per_kg       ALL N=145  r = -0.07 [-0.24, +0.09], p = 0.382, Holm 0.922; disattenuated -0.13 (partial on position); plain r = +0.19
+
+OUTCOMES (rookie-season metric -> later seasons; draft-controlled; exploratory)
+  g_route_speed_z      -> YPRR, later seasons (WR)       N= 30  coef -0.521 [-1.426, +0.383], p = 0.258, Holm 1.00
+  g_route_retention_z  -> YPRR, later seasons (WR)       N= 30  coef +0.227 [-1.239, +1.693], p = 0.761, Holm 1.00
+  cod_speed_z          -> YPRR, later seasons (WR)       N= 31  coef +0.835 [-0.023, +1.693], p = 0.056, Holm 0.39
+  g_force_oe_z         -> Snaps per later season (all)   N=192  coef +0.087 [-0.080, +0.254], +9.1% per SD, p = 0.309, Holm 1.00
+  g_turn_oe_z          -> Snaps per later season (all)   N=192  coef +0.028 [-0.151, +0.206], +2.8% per SD, p = 0.760, Holm 1.00
+  g_cut_speed_z        -> Snaps per later season (all)   N=192  coef +0.027 [-0.450, +0.504], +2.8% per SD, p = 0.911, Holm 1.00
+  force_oe_z           -> Snaps per later season (all)   N= 85  coef +0.033 [-0.144, +0.210], +3.4% per SD, p = 0.715, Holm 1.00
+  turn_oe_z            -> Snaps per later season (all)   N= 85  coef +0.196 [+0.044, +0.347], +21.6% per SD, p = 0.011, Holm 0.09
