@@ -1,0 +1,8 @@
+Speed at the slowest point of the last cut before the throw, WRs, Stage 3 sample
+  N = 4,450 routes, 41 receivers
+  median 10.7 km/h, IQR [5.5, 16.8], 10th-90th pct [2.5, 20.4], mean 11.2, SD 6.6
+  share below 10 km/h 47%, above 20 km/h 12%
+  turn 45-90 deg: n = 3,502, median 13.3 km/h; turn 90-180 deg: n = 948, median 3.0 km/h
+  SD within route x angle bin (the scale of 1 SD of apex_z): 4.4 km/h
+  SD within receiver: 6.5 km/h (total 6.6)
+  open (> 2 yd, n = 2,656) median 11.5 km/h vs tight (<= 2 yd, n = 1,794) 9.7 km/h; KS D = 0.100, p = 1.1e-09 (descriptive, not adjusted)

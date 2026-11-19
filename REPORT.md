@@ -15,11 +15,11 @@ format:
 
 ## 1. Introduction
 
-Optical tracking at the NFL Scouting Combine records each prospect's position, speed and acceleration through every drill. A natural hypothesis is that these movement profiles reveal ability that timed results miss. Raw correlations support it: among 96 receivers with a 40-yard time, each additional km/h of median speed in cutting drills is associated with 114 more career snaps (p = 0.002).
+Optical tracking at the NFL Scouting Combine records each prospect's position, speed and acceleration through every drill. Raw correlations suggest these profiles reveal ability that timed results miss: among 96 receivers with a 40-yard time, each additional km/h of median speed in cutting drills is associated with 114 more career snaps (p = 0.002).
 
 That association does not answer the question a front office faces. Playing time is allocated largely by draft investment, and teams already observe athleticism when they draft (Massey and Thaler 2013). The Combine has long been found to predict performance only weakly (Kuzmits and Adams 2008). The relevant quantity is therefore a metric's predictive value **conditional on draft position**.
 
-We show that the tracking metrics' value for playing time is explained by draft position, rank every predictor, and test two hypotheses about the cut in three pre-registered stages: Combine to career, Combine to game, and within player in games.
+We show that the tracking metrics' value for playing time is explained by draft position, rank every predictor, and test two hypotheses about the cut in three pre-registered stages.
 
 ## 2. Data
 
@@ -27,7 +27,7 @@ The cohort comprises 510 prospects drafted or signed as undrafted free agents in
 
 * **Combine tracking:** 10 Hz position, speed and acceleration magnitude for each drill repetition.
 * **Game tracking:** the same quantities for these players' NFL snaps.
-* **Outcomes:** career snaps and starts through the 2025 season, and per-snap efficiency from play-level records. Efficiency covers the regular season only (249,269 of 314,197 rows); the remainder are preseason and playoff snaps.
+* **Outcomes:** career snaps and starts through the 2025 season, and per-snap efficiency from play-level records. Efficiency uses regular-season rows only (249,269 of 314,197).
 
 ## 3. Methods
 
@@ -48,13 +48,13 @@ Holm's (1979) correction is applied within each family of tests.
 
 ### 3.2 Metrics
 
-**Receivers** are scored by median speed in the curl, comeback, speed-out and slant drills ($s_{\text{cut}}$), and by $z_{\text{cut}}$, which compares each player only with others who ran the same drill.
+**Receivers** are scored by median speed in the curl, comeback, speed-out and slant drills ($s_{\text{cut}}$), and by $z_{\text{cut}}$, standardised within drill.
 
 **Linemen** are scored by $\gamma_{\text{OE}}$ (90th-percentile acceleration magnitude residualised on weight) and **defensive backs** by 90th-percentile transition-drill speed.
 
 ### 3.3 Change-of-direction measurement
 
-Positions are smoothed with a seven-frame quadratic Savitzky–Golay filter (Savitzky and Golay 1964), which matches the provider's speed and acceleration columns (median per-repetition correlations 1.00 and 0.97). The filter's derivatives give velocity and acceleration vectors. Acceleration is split into a tangential (braking) and a normal (turning) component, and horizontal force is $F = m\,a$.
+Positions are smoothed with a seven-frame quadratic Savitzky–Golay filter (Savitzky and Golay 1964), which matches the provider's speed and acceleration columns (median per-repetition correlations 1.00 and 0.97). Its derivatives give velocity and acceleration vectors; acceleration splits into tangential (braking) and normal (turning) components, and horizontal force is $F = m\,a$.
 
 A **cut** is the slowest frame of a run of frames turning at least 45° over ±0.5 s. Speed at the cut is z-scored within drill (or route) and turn-angle bin. Force is residualised on body mass.
 
@@ -63,7 +63,7 @@ This yields two hypotheses:
 * **H1:** speed held through cuts, relative to peers, predicts performance.
 * **H2:** force produced through cuts, relative to size, predicts performance.
 
-Combine and game cuts are measured identically. In games, only cuts between the snap and the throw count.
+Game cuts are measured identically, between the snap and the throw.
 
 ### 3.4 Designs and inference
 
@@ -150,9 +150,13 @@ Figure 2 suggests why: the same 80 receivers cut at similar angles in both setti
 
 ### 4.4 Within-player effects in games
 
+![Speed at the slowest point of the last cut before the throw, by turn angle and by separation at the throw](last_cut_speed_distribution.png)
+
+Figure 3 shows the speed under test: a median 10.7 km/h at the last cut (interquartile range 5.5–16.8), 3.0 km/h on turns past 90°. One standard deviation within route and angle is about 4.4 km/h. Open receivers carry more (median 11.5 vs 9.7 km/h), a raw split that mixes routes and receivers.
+
 ![Within-player effect of speed through the cut on separation](play_level_cut_speed.png)
 
-Figure 3 reports Stage 3. Because each receiver is compared with himself, draft slot, talent, size and team cannot account for the estimates. One standard deviation more speed through the last cut raises separation at the throw by 0.12 yards (wild-bootstrap p = 0.003; Freedman–Lane within-receiver p = 0.003).
+Figure 4 reports Stage 3. Comparing each receiver with himself removes draft slot, talent, size and team. One standard deviation more speed through the last cut raises separation at the throw by 0.12 yards (wild-bootstrap p = 0.003; Freedman–Lane within-receiver p = 0.003).
 
 The effect is concentrated where a cut must beat a defender:
 
@@ -163,7 +167,7 @@ It replicates for tight ends (+0.14), raises target probability by 3.0 points pe
 
 ![Distribution of adjusted separation by the receiver's own cut speed, and effects on P(separation > c)](separation_distribution.png)
 
-Figure 4 shows where the gain sits. Each standard deviation raises the probability of more than 1, 2 and 3 yards of separation by 3.6, 4.6 and 3.9 percentage points (wild-bootstrap p $\le$ 0.001), but leaves more than 4 yards unchanged (+0.8 [−0.9, +2.6]). Holding speed turns tight coverage into open targets rather than creating wide-open ones.
+Figure 5 shows where the gain sits. Each standard deviation raises the probability of more than 1, 2 and 3 yards of separation by 3.6, 4.6 and 3.9 percentage points (wild-bootstrap p $\le$ 0.001), but leaves more than 4 yards unchanged (+0.8 [−0.9, +2.6]). Holding speed turns tight coverage into open targets rather than creating wide-open ones.
 
 H2 is not supported. Turning force alone does not predict separation (−0.01 yards per 100 N, p = 0.79). Holding speed fixed, greater turning force, implying a tighter turn, lowers separation (−0.11, p = 0.001).
 
@@ -173,16 +177,16 @@ The Combine signal for playing time restates the draft board. The cut skill matt
 
 ![Comeback route, Nacua vs Johnston](route_kinematics_field_plot.png)
 
-In Figure 5, Puka Nacua (pick 177, later an All-Pro) and Quentin Johnston (pick 21) enter one comeback break alike, yet one second later Nacua is at 22.7 km/h and Johnston at 15.7. That is the Stage 3 skill, but one repetition cannot rank prospects.
+In Figure 6, Puka Nacua (pick 177, later an All-Pro) and Quentin Johnston (pick 21) enter one comeback break alike, yet one second later Nacua is at 22.7 km/h and Johnston at 15.7. That is the Stage 3 skill, but one repetition cannot rank prospects.
 
-For player evaluation, four implications follow:
+Four implications follow:
 
 1. Test any metric conditional on draft position.
 2. Do not scout cutting from Combine drills.
 3. Measure speed through cuts from game or college tracking.
 4. Keep timed short-area speed for pass rushers, where the 10-yard split predicts pressure rate beyond draft slot.
 
-A 0.12-yard effect is about 6% of one standard deviation of separation. It is small per play but accumulates over hundreds of routes.
+The 0.12-yard effect, about 6% of a standard deviation of separation, is small per play but accumulates over hundreds of routes.
 
 ## 6. Limitations
 
@@ -220,7 +224,7 @@ White, H. (1980). A heteroskedasticity-consistent covariance matrix estimator an
 
 ![Permutation nulls for the within-receiver cut-speed effect](permutation_nulls.png)
 
-Figure 6 shows the two permutation tests for Stage 3, both shuffling within receiver. Only 12 of 4,999 shuffles reach the observed |t| of 3.34, and none of 200 matches the observed conformal width change (−0.40%). Full output: `results/distribution_checks.txt`.
+Figure 7 shows the two permutation tests for Stage 3, both shuffling within receiver. Only 12 of 4,999 shuffles reach the observed |t| of 3.34, and none of 200 matches the observed conformal width change (−0.40%). Full output: `results/distribution_checks.txt`.
 
 ## Code and data availability
 

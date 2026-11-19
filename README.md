@@ -58,6 +58,7 @@ Combine tracking metrics correlate with NFL playing time, but almost entirely be
 | [`route_kinematics_field_plot.png`](./route_kinematics_field_plot.png) | Comeback route: Nacua vs Johnston paths and speed through the break |
 | [`mass_vs_gamma_scatter.png`](./mass_vs_gamma_scatter.png) | Defensive-line weight vs 90th-percentile acceleration |
 | [`play_level_cut_speed.png`](./play_level_cut_speed.png) | Within-player effect of speed through the cut on separation |
+| [`last_cut_speed_distribution.png`](./last_cut_speed_distribution.png) | Receivers' speed at the last cut before the throw: PDF by turn angle, CDF by open vs tight (1 SD ≈ 4.4 km/h) |
 | [`separation_distribution.png`](./separation_distribution.png) | Adjusted separation PDF/CDF by the receiver's own cut speed, and effects on P(separation > c) |
 | [`combine_vs_game_cuts.png`](./combine_vs_game_cuts.png) | CDFs of cut speed and turn angle for the same receivers, Combine vs games |
 | [`permutation_nulls.png`](./permutation_nulls.png) | Within-receiver permutation null distributions (appendix) |
@@ -105,6 +106,7 @@ nfl-big-data-bowl-2027/
 │   ├── transfer_test.py                   # Combine vs in-game cut metrics
 │   ├── play_level_fe.py                   # Within-player play-level test
 │   ├── distribution_checks.py             # Wild bootstrap, permutations, distribution regression, PDF/CDF figures
+│   ├── last_cut_speed.py                  # PDF/CDF of speed at the last cut (Stage 3 sample)
 │   ├── game_speed_distribution.py         # Regular-season speed distribution
 │   ├── make_field_plot.py                 # Static figures
 │   └── make_interactive_playback.py       # Plotly widgets
@@ -130,6 +132,7 @@ python scripts/game_cod_features.py            # or set NFL_BDB_ZIP to read trac
 python scripts/transfer_test.py
 python scripts/play_level_fe.py
 python scripts/distribution_checks.py          # slow: ~30 min (conformal shuffles)
+python scripts/last_cut_speed.py
 python scripts/game_speed_distribution.py
 python scripts/make_field_plot.py
 python scripts/make_interactive_playback.py
