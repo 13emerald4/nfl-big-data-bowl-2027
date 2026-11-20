@@ -3,7 +3,7 @@ title: "Beyond the Stopwatch, Behind the Draft Board: What Combine Tracking Adds
 author: "Michael Polley"
 subtitle: "NFL Big Data Bowl 2027, Analytics Track"
 abstract: |
-  Combine sensor tracking records every drill at 10 Hz, and its movement metrics correlate with NFL playing time. Using 510 prospects from the 2023–2025 classes, we ask whether they predict careers beyond draft position. All four headline tracking metrics are significant alone and none remains so with draft controls; draft variables explain 51% of receiver snap variance and tracking adds 0.2 percentage points. We then test, in three pre-registered stages, whether holding speed through a change of direction and producing force through it relative to body size predict performance. Combine versions of both are unreliable (cut speed correlates 0.03 across drills) and do not track the same quantities measured in 166,150 in-game cuts (Spearman $\rho$ = +0.01 and −0.18). Measured in games, however, holding speed through the last cut before the throw raises separation by 0.12 yards per standard deviation when each receiver is compared with himself (wild-bootstrap 95% CI 0.05–0.19, p = 0.003), and by 0.19 yards against man coverage. The gain turns tight coverage into open targets rather than creating wide-open ones. The skill is real; Combine drills do not measure it.
+  Combine tracking records every drill at 10 Hz, and its metrics correlate with NFL playing time. Using 510 prospects from the 2023–2025 classes, we ask whether they predict careers beyond draft position. All four headline tracking metrics are significant alone and none remains so with draft controls; draft variables explain 51% of receiver snap variance and tracking adds 0.2 percentage points. We then test, in three pre-registered stages, whether holding speed through a change of direction and producing force through it relative to body size predict performance. Combine versions of both are unreliable (cut speed correlates 0.03 across drills) and do not track the same quantities measured in 166,150 in-game cuts (Spearman $\rho$ = +0.01 and −0.18). In games, however, holding speed through the last cut before the throw raises separation by 0.12 yards per standard deviation when each receiver is compared with himself (wild-bootstrap 95% CI 0.05–0.19, p = 0.003), and by 0.19 yards against man coverage. The gain turns tight coverage into open targets rather than creating wide-open ones. The skill is real; Combine drills do not measure it.
 format:
   pdf:
     number-sections: false
@@ -44,7 +44,7 @@ Undrafted players are coded as pick 262, and position fixed effects are added wh
 * **Rates:** fractional logit (Papke and Wooldridge 1996).
 * **Snaps per season:** Poisson quasi-maximum likelihood.
 
-Holm's (1979) correction is applied within each family of tests.
+Holm's (1979) correction applies within each test family.
 
 ### 3.2 Metrics
 
@@ -58,7 +58,7 @@ Positions are smoothed with a seven-frame quadratic Savitzky–Golay filter (Sav
 
 A **cut** is the slowest frame of a run of frames turning at least 45° over ±0.5 s. Speed at the cut is z-scored within drill (or route) and turn-angle bin. Force is residualised on body mass.
 
-This yields two hypotheses:
+Two hypotheses follow:
 
 * **H1:** speed held through cuts, relative to peers, predicts performance.
 * **H2:** force produced through cuts, relative to size, predicts performance.
@@ -73,7 +73,7 @@ Each stage was pre-registered before its outcomes were read (`results/*_preregis
 * **Stage 2** correlates each Combine metric with its in-game counterpart. It reports the maximum correlation attainable given both measures' split-half reliabilities (Spearman 1904).
 * **Stage 3** regresses separation at the throw on the last cut's speed, play by play. It includes fixed effects for player, route, coverage type, receiver alignment, down and opponent × season, plus turn angle, cut timing, distance to go, cushion and dropback time. Errors are clustered by player; because 41 clusters is few, p-values and intervals come from a wild cluster bootstrap (Rademacher weights, 9,999 draws) and a Freedman–Lane permutation within receiver. Distribution regressions estimate effects on P(separation > c).
 
-Stages 1 and 3 add CV+ conformal intervals (Barber et al. 2021) at 80% coverage with and without the metric, tested by shuffling the metric (within receiver in Stage 3). Stage 2 uses Spearman correlations with bootstrap intervals; Stage 1, HC3 and pairs-bootstrap intervals.
+Stages 1 and 3 add CV+ conformal intervals (Barber et al. 2021) at 80% coverage with and without the metric, tested by shuffling the metric (within receiver in Stage 3).
 
 ## 4. Results
 
@@ -110,7 +110,7 @@ The raw tier gap is large (Welch t = 4.75, p < 0.001), but half the fringe tier 
 
 ### 4.2 Predictor ranking
 
-Table 3 ranks every predictor by cross-validated starter AUC and by efficiency rank correlation beyond draft pick.
+Table 3 ranks every predictor.
 
 | Outcome | 1st | 2nd | 3rd | Best tracking metric |
 |:--|:--|:--|:--|:--|
@@ -184,9 +184,9 @@ Four implications follow:
 1. Test any metric conditional on draft position.
 2. Do not scout cutting from Combine drills.
 3. Measure speed through cuts from game or college tracking.
-4. Keep timed short-area speed for pass rushers, where the 10-yard split predicts pressure rate beyond draft slot.
+4. Keep the 10-yard split for pass rushers; it predicts pressure rate beyond draft slot.
 
-The 0.12-yard effect, about 6% of a standard deviation of separation, is small per play but accumulates over hundreds of routes.
+The 0.12-yard effect, about 6% of a standard deviation of separation, is worth 0.006 expected points per route through separation, about 3 points over 500 routes. Further pre-registered tests (Appendix B) find that speed into the catch adds yards after it and a faster pass-rush get-off raises pressure; short weeks do not slow players.
 
 ## 6. Limitations
 
@@ -194,7 +194,7 @@ Careers span one to three seasons, and efficiency samples are small (57–69 pla
 
 * **Play design:** a route may be called to beat a coverage.
 * **Throw timing:** the quarterback times the throw on perceived openness.
-* **The defender:** his movement is untracked.
+* **The defender:** tracked on only 156 man-coverage plays (Appendix B).
 
 Force is horizontal only, and the tracked point is not the centre of mass. The estimates are consistent with a causal effect, strongest against man coverage, but do not establish one.
 
@@ -225,6 +225,35 @@ White, H. (1980). A heteroskedasticity-consistent covariance matrix estimator an
 ![Permutation nulls for the within-receiver cut-speed effect](permutation_nulls.png)
 
 Figure 7 shows the two permutation tests for Stage 3, both shuffling within receiver. Only 12 of 4,999 shuffles reach the observed |t| of 3.34, and none of 200 matches the observed conformal width change (−0.40%). Full output: `results/distribution_checks.txt`.
+
+\newpage
+
+## Appendix B. Follow-up pre-registered tests
+
+Seven further tests were pre-registered (`results/followup_preregistration.md`) before any of their treatment–outcome relationships was computed. Each compares a player with himself (player fixed effects plus opponent × season, down and play-type controls), uses wild cluster bootstrap inference, and applies Holm's correction across the seven primary estimates.
+
+| Test | Treatment → outcome | Sample | Effect (95% CI) | Holm p |
+|:-|:-------|:----|:------|:--|
+| T1 | Cut speed → separation → receiver EPA (indirect) | 4,450 routes, 41 WR | +0.006 EPA per SD [0.002, 0.010] | 0.005 |
+| T2 | Speed at the catch → yards after catch | 4,757 catches, 104 players | +0.83 yd per m/s [0.64, 1.02] | < 0.001 |
+| T3 | Faster pass-rush get-off → pressure | 33,312 rushes, 88 players | +0.47 points per 0.1 s [0.37, 0.58] | < 0.001 |
+| T4 | Faster lineman get-off → pressure probability allowed | 46,142 snaps, 74 players | +0.44 points per 0.1 s [0.33, 0.56] | < 0.001 |
+| T5 | Shoulders turned early before the cut → separation | 4,434 routes, 41 WR | +0.04 yd per SD [−0.03, +0.10] | 0.48 |
+| T6 | Speed gap over the man defender → separation | 156 plays, 27 WR | below the pre-set minimum of 200 plays | — |
+| T7 | Short rest ($\le$ 5 days) → peak game speed | 2,514 player-games, 157 players | +0.16 km/h [−0.11, +0.42] | 0.48 |
+
+: Follow-up tests. Points are percentage points. {#tbl-followup}
+
+Table 5 reads with these qualifications:
+
+* **T1:** the total effect of cut speed on receiver EPA is not significant (+0.009, p = 0.45). The indirect effect assumes no unmeasured play-level confounder of separation and EPA.
+* **T2:** the effect holds beyond the provider's expected-YAC model (+0.16 yd per m/s, p = 0.02) and grows with separation at the throw controlled (+0.93), so catch speed is not a proxy for being open.
+* **T3:** the pre-registered sample included run plays, on which pressure cannot occur and rushers get off slower (1.17 vs 0.96 s). On pass plays alone (post hoc) the effect is larger, +0.68 points per 0.1 s.
+* **T4:** the sign is opposite to the hypothesis and survives controls and splits for dropback length. The likeliest reading is that a lineman moves fast because a fast rusher forces him to, so this is not a coaching lever.
+* **T6:** too few plays track both the receiver and his man defender; the descriptive within-receiver rank correlation (−0.21) is not interpreted.
+* **T7:** the interval rules out a short-week slowdown larger than about 0.1 km/h; receivers' cut speed does not drop either (p = 0.17).
+
+Full output: `results/followup_summary.txt` and `results/followup_posthoc.txt` (post-hoc checks, labelled as such).
 
 ## Code and data availability
 

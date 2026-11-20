@@ -39,6 +39,13 @@ Combine tracking metrics correlate with NFL playing time, but almost entirely be
     * Within-receiver Freedman–Lane permutation gives p = 0.003.
     * Spearman transfer correlations: ρ = +0.01 and −0.18.
   * **Where the gain sits:** P(separation > 1, 2, 3 yd) rises by 3.6–4.6 points per SD, while P(> 4 yd) is unchanged. Holding speed turns tight coverage into open targets, not wide-open ones.
+* **Seven follow-up tests, pre-registered** (`results/followup_preregistration.md`; paper Appendix B). Each compares a player with himself, with wild-bootstrap p-values and Holm correction:
+  * **Cut speed → EPA:** through separation, +0.006 EPA per SD per route (Holm p = 0.005). The total effect is not significant.
+  * **Speed at the catch → YAC:** +0.83 yd per m/s (p < 0.001). It holds beyond expected YAC and with separation controlled.
+  * **Pass-rush get-off → pressure:** +0.47 points per 0.1 s faster (p < 0.001); +0.68 on pass plays only (post hoc).
+  * **Lineman get-off → pressure allowed:** significant but the **wrong sign**, most likely the lineman reacting to a fast rusher. Not a lever.
+  * **Nulls:** shoulders turned before the cut → separation (p = 0.48); short rest → peak speed (+0.16 km/h, CI rules out a drop > 0.1).
+  * **Head-to-head speed gap vs the man defender:** only 156 plays, below the pre-set minimum. Descriptive only.
 * **Predictor ranking** (`scripts/rank_predictors.py`):
   * **Playing time:** draft pick ranks first at every position (starter AUC 0.82–0.93), then the NGS final and college-production scores. Nothing adds to draft pick out of sample.
   * **Per-snap efficiency:** the strongest signals beyond draft slot are drill-standardised cut speed for receiver YPRR (+0.33, p = 0.008), and the NGS final score (+0.36) and 10-yard split (−0.29, p = 0.034) for pass-rush pressure rate.
@@ -107,6 +114,9 @@ nfl-big-data-bowl-2027/
 │   ├── play_level_fe.py                   # Within-player play-level test
 │   ├── distribution_checks.py             # Wild bootstrap, permutations, distribution regression, PDF/CDF figures
 │   ├── last_cut_speed.py                  # PDF/CDF of speed at the last cut (Stage 3 sample)
+│   ├── followup_features.py               # One tracking pass: catch speed, get-offs, shoulders, paths, peak speed
+│   ├── followup_tests.py                  # The seven pre-registered follow-up tests (T1-T7)
+│   ├── followup_posthoc.py                # Post-hoc checks of T2, T3, T4 and T6 (labelled, not pre-registered)
 │   ├── game_speed_distribution.py         # Regular-season speed distribution
 │   ├── make_field_plot.py                 # Static figures
 │   └── make_interactive_playback.py       # Plotly widgets
@@ -133,6 +143,9 @@ python scripts/transfer_test.py
 python scripts/play_level_fe.py
 python scripts/distribution_checks.py          # slow: ~30 min (conformal shuffles)
 python scripts/last_cut_speed.py
+python scripts/followup_features.py            # streams game tracking (~5 min)
+python scripts/followup_tests.py
+python scripts/followup_posthoc.py
 python scripts/game_speed_distribution.py
 python scripts/make_field_plot.py
 python scripts/make_interactive_playback.py

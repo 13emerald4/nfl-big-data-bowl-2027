@@ -1,0 +1,29 @@
+Follow-up causal tests (results/followup_preregistration.md)
+coef [95% wild-bootstrap CI] (T1 indirect: cluster bootstrap); per SD = per 1 SD within unit
+
+T1  a: apex_z -> separation: +0.1201 [+0.0472, +0.1920], p = 0.0034, Holm 0.0136; per SD +0.1150; n = 4,450, units = 41
+T1  b: separation -> receiver EPA | apex_z: +0.0520 [+0.0374, +0.0660], p = 0.0000, Holm 0.0000; per SD +0.1033; n = 4,450, units = 41
+T1  total: apex_z -> receiver EPA: +0.0095 [-0.0163, +0.0355], p = 0.4514, Holm 1.0000; per SD +0.0091; n = 4,450, units = 41
+T1  direct: apex_z -> receiver EPA | separation: +0.0032 [-0.0220, +0.0291], p = 0.7898, Holm 1.0000; per SD +0.0031; n = 4,450, units = 41
+T1  completion | target: apex_z: +0.0079 [-0.0227, +0.0392], p = 0.6039, Holm 1.0000; per SD +0.0072; n = 1,313, units = 41
+T1  PRIMARY indirect a*b (primary): +0.0062 [+0.0022, +0.0103], p = 0.0016, Holm 0.0048; per SD +0.0062; n = 4,450, units = 41
+T2  PRIMARY catch speed -> YAC (primary): +0.8307 [+0.6426, +1.0235], p = 0.0000, Holm 0.0000; per SD +1.5850; n = 4,757, units = 104
+T2  catch speed -> YAC over expected: +0.1599 [+0.0260, +0.2922], p = 0.0203, Holm 0.0203; per SD +0.3050; n = 4,693, units = 104
+T2  catch speed -> P(YAC >= 5): +0.0553 [+0.0437, +0.0674], p = 0.0000, Holm 0.0000; per SD +0.1055; n = 4,757, units = 104
+T3  PRIMARY get-off (faster) -> pressure (primary): +0.0474 [+0.0367, +0.0580], p = 0.0000, Holm 0.0000; per SD +0.0132; n = 33,312, units = 88
+T3  get-off -> sack: +0.0040 [-0.0003, +0.0084], p = 0.0709, Holm 0.0709; per SD +0.0011; n = 33,312, units = 88
+T3  get-off -> time to pressure | pressure: -1.0805 [-1.2802, -0.8781], p = 0.0000, Holm 0.0000; per SD -0.2401; n = 2,605, units = 80
+T3  get-off -> pressure, + dropback: +0.0990 [+0.0789, +0.1187], p = 0.0000, Holm 0.0000; per SD +0.0247; n = 17,325, units = 88
+T4  PRIMARY OL get-off (faster) -> peak pressure prob (primary): +0.0442 [+0.0328, +0.0560], p = 0.0000, Holm 0.0000; per SD +0.0142; n = 46,142, units = 74
+T4  OL get-off -> pressure allowed: +0.0236 [+0.0151, +0.0322], p = 0.0000, Holm 0.0000; per SD +0.0076; n = 46,142, units = 74
+T4  set depth at 1.0 s -> peak pressure prob: +0.0883 [+0.0837, +0.0929], p = 0.0000, Holm 0.0000; per SD +0.0556; n = 46,142, units = 74
+T5  PRIMARY early shoulder turn -> separation (primary): +0.0371 [-0.0282, +0.0993], p = 0.2461, Holm 0.4832; per SD +0.0367; n = 4,434, units = 41
+T5  early shoulder turn -> separation | apex_z: +0.0338 [-0.0313, +0.0950], p = 0.2942, Holm 0.5885; per SD +0.0334; n = 4,434, units = 41
+T5  early shoulder turn, man: +0.0002 [-0.0833, +0.0796], p = 0.9945, Holm 0.9945; per SD +0.0002; n = 1,404, units = 41
+T5  early shoulder turn, zone: +0.0595 [-0.0247, +0.1386], p = 0.1512, Holm 0.4536; per SD +0.0575; n = 3,030, units = 41
+T6  below minimum (descriptive only)  n=156
+T7  PRIMARY short rest -> peak speed, skill (primary): +0.1579 [-0.1127, +0.4217], p = 0.2416, Holm 0.4832; per SD +0.0407; n = 2,514, units = 157
+T7  long rest -> peak speed, skill: +0.0391 [-0.2097, +0.2879], p = 0.7589, Holm 1.0000; per SD +0.0134; n = 2,514, units = 157
+T7  short rest -> peak speed, skill, + plays: +0.0916 [-0.1751, +0.3548], p = 0.4919, Holm 1.0000; per SD +0.0236; n = 2,514, units = 157
+T7  short rest -> peak speed, all positions: +0.0724 [-0.1311, +0.2759], p = 0.4823, Holm 1.0000; per SD +0.0186; n = 5,206, units = 313
+T7  short rest -> receiver mean apex_z: -0.1123 [-0.2759, +0.0513], p = 0.1673, Holm 0.6693; per SD -0.0287; n = 547, units = 41
