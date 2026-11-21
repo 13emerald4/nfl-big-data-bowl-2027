@@ -1,0 +1,43 @@
+Receivers' Combine cut speed: baseline regressions (HC1 standard errors)
+Input data/features_wr.parquet, 106 receivers. s_cut = median speed in cutting drills (km/h); s_cut_z = drill-standardised.
+
+== s_cut ~ forty
+  s_cut    slope -1.7131 (SE 1.7549) [-5.1525, +1.7264], p = 0.329, R² 0.012, N = 96
+  s_cut_z  slope -0.6225 (SE 0.6197) [-1.8371, +0.5921], p = 0.315, R² 0.009, N = 96
+  Residual checks (outcome ~ cut speed over expected, HC1):
+    s_cut over expected          -> starter                  +0.0721 [+0.0239, +0.1203], p = 0.003, N = 96
+    s_cut over expected          -> career_offensive_snaps   +114.2103 [+42.1253, +186.2953], p = 0.002, N = 96
+    s_cut over expected          -> yprr                     +0.0210 [-0.1324, +0.1744], p = 0.788, N = 57
+    s_cut_z over expected        -> starter                  +0.1501 [-0.0009, +0.3010], p = 0.051, N = 96
+    s_cut_z over expected        -> career_offensive_snaps   +215.7862 [+32.2188, +399.3536], p = 0.021, N = 96
+    s_cut_z over expected        -> yprr                     +0.2186 [-0.0718, +0.5090], p = 0.140, N = 57
+  Top 5 over expected: Roman Wilson +3.10; Jordan Addison +2.27; Dont'e Thornton +2.00; Johnny Wilson +1.87; Cornelius Johnson +1.82
+  Bottom 5 over expected: Da'Quan Felton -6.24; LaJohntay Wester -4.11; Josh Kelly -3.71; Arian Smith -3.21; Isaiah Bond -2.51
+
+== s_cut ~ log_pick
+  s_cut    slope -0.5511 (SE 0.1627) [-0.8700, -0.2321], p < 0.001, R² 0.082, N = 106
+  s_cut_z  slope -0.1209 (SE 0.0654) [-0.2491, +0.0073], p = 0.065, R² 0.026, N = 106
+  Residual checks (outcome ~ cut speed over expected, HC1):
+    s_cut over expected          -> starter                  +0.0334 [-0.0102, +0.0769], p = 0.133, N = 106
+    s_cut over expected          -> career_offensive_snaps   +70.0134 [+2.5501, +137.4768], p = 0.042, N = 106
+    s_cut over expected          -> yprr                     -0.0002 [-0.1565, +0.1560], p = 0.998, N = 62
+    s_cut_z over expected        -> starter                  +0.1013 [-0.0404, +0.2430], p = 0.161, N = 106
+    s_cut_z over expected        -> career_offensive_snaps   +153.9795 [-26.7625, +334.7216], p = 0.095, N = 106
+    s_cut_z over expected        -> yprr                     +0.1743 [-0.1059, +0.4544], p = 0.223, N = 62
+  Top 5 over expected: Roman Wilson +3.02; Cornelius Johnson +2.27; Dont'e Thornton +2.21; Johnny Wilson +2.01; Jha'Quan Jackson +1.90
+  Bottom 5 over expected: Da'Quan Felton -5.88; Ja'Corey Brooks -4.06; LaJohntay Wester -3.82; Josh Kelly -3.69; Arian Smith -3.09
+
+== s_cut ~ combine_weight
+  s_cut    slope +0.0092 (SE 0.0105) [-0.0113, +0.0297], p = 0.380, R² 0.009, N = 106
+  s_cut_z  slope +0.0004 (SE 0.0040) [-0.0073, +0.0081], p = 0.920, R² 0.000, N = 106
+  Residual checks (outcome ~ cut speed over expected, HC1):
+    s_cut over expected          -> starter                  +0.0846 [+0.0394, +0.1298], p < 0.001, N = 106
+    s_cut over expected          -> career_offensive_snaps   +141.7291 [+68.2782, +215.1799], p < 0.001, N = 106
+    s_cut over expected          -> yprr                     +0.0712 [-0.0706, +0.2130], p = 0.325, N = 62
+    s_cut_z over expected        -> starter                  +0.1769 [+0.0361, +0.3177], p = 0.014, N = 106
+    s_cut_z over expected        -> career_offensive_snaps   +261.4730 [+83.4341, +439.5119], p = 0.004, N = 106
+    s_cut_z over expected        -> yprr                     +0.2465 [-0.0239, +0.5170], p = 0.074, N = 62
+  Top 5 over expected: Roman Wilson +3.39; Jaxon Smith-Njigba +2.67; Jordan Addison +2.50; Dont'e Thornton +2.26; Devontez Walker +1.83
+  Bottom 5 over expected: Da'Quan Felton -6.40; Ja'Corey Brooks -4.31; Josh Kelly -3.96; LaJohntay Wester -3.74; Arian Smith -2.82
+
+No official 40 time (absent from regression 1): Jaxon Smith-Njigba, Quentin Johnston, Puka Nacua.
