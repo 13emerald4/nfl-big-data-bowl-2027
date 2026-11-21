@@ -1,0 +1,19 @@
+Genetic-algorithm search for a receiver cut metric (results/ga_preregistration.md)
+
+Training 2023-24, holdout 2025. NSGA-II population 80, 40 generations, seed 2027.
+Selected: turn >= 45 deg, window +-0.5 s, peers by position: +0.30 x cut speed -0.11 x turning accel.
+  training validity +0.301 yd per SD, reliability 0.60
+Benchmark (Stage 3 cut speed): training validity +0.115, reliability 0.47
+Null (200 searches, residuals permuted within receiver): selected validity median +0.258, 95th pct +0.435; p = 0.323
+
+HOLDOUT 2025 (primary), within receiver, wild cluster bootstrap:
+  selected composite: +0.195 yd per SD [+0.041, +0.347], p = 0.0157; n = 2,284, receivers = 37
+  benchmark cut speed: +0.114 [+0.031, +0.196], p = 0.0107; n = 2,284
+
+RANKINGS (41 receivers, 30+ plays, 2023-25; 95% bootstrap rank intervals)
+  median rank-interval width: cut composite 26 places, momentum 23, speed for size 26
+  between-player check: Spearman(score, mean separation) = +0.08 (p = 0.623); Spearman(score, YPRR, 100+ routes) = -0.06 (p = 0.709, N = 41)
+  Top 10, cut composite: Mitch Tinsley 1 [1-6]; Devaughn Vele 2 [1-26]; Kayshon Boutte 3 [2-23]; Jalen Brooks 4 [2-29]; Brian Thomas 5 [3-20]; Roman Wilson 6 [2-33]; Jalen McMillan 7 [2-27]; Luther Burden 8 [2-29]; Tank Dell 9 [2-28]; Adonai Mitchell 10 [2-33]
+  Top 10, momentum: Mitch Tinsley 362 kg m/s [1-10]; Adonai Mitchell 317 kg m/s [1-24]; Devaughn Vele 315 kg m/s [1-25]; Brian Thomas 310 kg m/s [2-19]; Jalen Brooks 308 kg m/s [1-27]; Kayshon Boutte 305 kg m/s [2-24]; Jack Bech 303 kg m/s [2-29]; Rome Odunze 303 kg m/s [3-23]; Luther Burden 302 kg m/s [2-29]; Michael Wilson 301 kg m/s [4-20]
+  Top 10, speed for size: Mitch Tinsley +0.91 m/s [1-10]; Kayshon Boutte +0.33 m/s [2-25]; Devaughn Vele +0.33 m/s [1-30]; Adonai Mitchell +0.31 m/s [1-31]; Jalen Brooks +0.28 m/s [1-31]; Roman Wilson +0.26 m/s [1-33]; Chimere Dike +0.25 m/s [2-32]; Jalen McMillan +0.23 m/s [2-29]; Jordan Addison +0.23 m/s [2-34]; Brian Thomas +0.19 m/s [4-27]
+Run time 1684 s

@@ -1,0 +1,7 @@
+{
+  "selected": "turn >= 45 deg, window +-0.5 s, peers by position: +0.30 x cut speed -0.11 x turning accel.",
+  "validity": 0.30113932017599354,
+  "reliability": 0.6043824363040866,
+  "bench_validity": 0.11500493827164222,
+  "bench_reliability": 0.47
+}
